@@ -1,0 +1,17 @@
+[Unit]
+Description=深圳学位房规划助手 API 服务
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/xuequ-api
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+ExecStart=/usr/bin/python3 -m uvicorn main:app --host 0.0.0.0 --port 8890
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

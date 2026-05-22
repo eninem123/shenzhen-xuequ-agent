@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>深圳学位房规划助手</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f172a;--card:#1e293b;--input:#334155;--accent:#3b82f6;--accent2:#8b5cf6;--green:#10b981;--orange:#f59e0b;--red:#ef4444;--text:#f1f5f9;--text2:#94a3b8;--border:#475569;--radius:12px}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.header{background:var(--card);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.header h1{font-size:16px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1}
+.header .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.tabs{display:flex;background:var(--card);flex-shrink:0}
+.tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab.plan-tab.active{color:var(--orange);border-bottom-color:var(--orange)}
+.chat-view{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.chat-area{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:90%;padding:12px 14px;border-radius:var(--radius);font-size:14px;line-height:1.7;word-break:break-word}
+.msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px}
+.msg.bot b,.msg.bot strong{color:var(--accent)}
+.msg.bot h2,.msg.bot h3{margin:8px 0 4px;font-size:14px;color:var(--orange)}
+.msg.bot table{width:100%;border-collapse:collapse;margin:6px 0;font-size:12px}
+.msg.bot th,.msg.bot td{border:1px solid var(--border);padding:5px 8px;text-align:left}
+.msg.bot th{background:rgba(59,130,246,.12)}
+.msg.bot blockquote{border-left:3px solid var(--accent);padding-left:8px;margin:6px 0;color:var(--text2)}
+.quick-q{display:flex;flex-wrap:wrap;gap:6px;padding:6px 16px;flex-shrink:0}
+.quick-q button{padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:12px;cursor:pointer}
+.quick-q button:active{border-color:var(--accent);color:var(--accent)}
+.input-area{padding:8px 16px 14px;background:var(--card);border-top:1px solid var(--border);flex-shrink:0}
+.input-row{display:flex;gap:8px;align-items:flex-end}
+.input-row textarea{flex:1;background:var(--input);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;color:var(--text);font-size:16px;resize:none;min-height:42px;max-height:100px;line-height:1.5;font-family:inherit;outline:none}
+.input-row textarea:focus{border-color:var(--accent)}
+.send-btn{width:44px;height:44px;border-radius:var(--radius);border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.send-btn:disabled{opacity:.4}
+.plan-view{flex:1;display:none;flex-direction:column;overflow:hidden}
+.plan-form{flex:1;overflow-y:auto;padding:16px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.form-group label .req{color:var(--red);margin-left:2px}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--input);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:15px;font-family:inherit;outline:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.form-group select option{background:var(--card);color:var(--text)}
+.form-row{display:flex;gap:10px}
+.form-row .form-group{flex:1}
+.form-hint{font-size:11px;color:var(--text2);margin-top:4px}
+.submit-plan{padding:12px 16px;background:linear-gradient(135deg,var(--orange),#d97706);border:none;border-radius:var(--radius);color:#fff;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
+.submit-plan:disabled{opacity:.5;cursor:not-allowed}
+.plan-result{display:none;flex:1;flex-direction:column;overflow:hidden}
+.plan-result-area{flex:1;overflow-y:auto;padding:16px}
+.plan-card{background:var(--card);border:1px solid var(--orange);border-radius:var(--radius);padding:16px;font-size:13.5px;line-height:1.8}
+.plan-card h2{color:var(--orange);font-size:15px;margin-bottom:10px}
+.plan-card h3{color:var(--accent);font-size:14px;margin:10px 0 6px}
+.plan-card table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.plan-card th,.plan-card td{border:1px solid var(--border);padding:6px 8px;text-align:left}
+.plan-card th{background:rgba(245,158,11,.1)}
+.plan-card b{color:var(--orange)}
+.plan-card a{color:var(--accent)}
+.plan-actions{display:flex;gap:8px;padding:12px 16px;background:var(--card);border-top:1px solid var(--border);flex-shrink:0}
+.plan-actions button{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-weight:600;cursor:pointer}
+.plan-actions button.primary{background:linear-gradient(135deg,var(--orange),#d97706);border:none;color:#fff}
+.plan-actions button:active{transform:scale(.97)}
+.typing{display:inline-flex;gap:4px;padding:4px 0}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--text2);animation:bounce 1.4s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+@media(max-width:480px){.msg{max-width:93%;font-size:13.5px}}
+</style>
+</head>
+<body>
+<div class="header"><div class="dot"></div><h1>深圳学位房规划助手</h1></div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('quick')">⚡ 中介快答</div>
+  <div class="tab plan-tab" onclick="switchTab('plan')">📋 出方案</div>
+</div>
+
+<div class="chat-view" id="chatView">
+  <div class="chat-area" id="chatArea">
+    <div class="msg bot">您好！我是深圳学位房规划助手 🏠<br><br>⚡ <b>中介快答</b>：秒查学区、积分、价格<br>📋 <b>出方案</b>：填写客户信息后出定制方案<br><br>有什么想查的？</div>
+  </div>
+  <div class="quick-q">
+    <button onclick="ask('300万预算能上第一梯队吗')">300万能上第一梯队吗</button>
+    <button onclick="ask('龙华深户购房积分多少')">龙华深户购房积分</button>
+    <button onclick="ask('福田学区房推荐')">福田学区房推荐</button>
+    <button onclick="ask('学位锁定怎么查')">学位锁定怎么查</button>
+    <button onclick="ask('深圳各区初中排名')">各区初中排名</button>
+  </div>
+  <div class="input-area">
+    <div class="input-row">
+      <textarea id="msgInput" rows="1" placeholder="输入您的问题..." onkeydown="onKey(event)" oninput="autoGrow(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="send()">➤</button>
+    </div>
+  </div>
+</div>
+
+<div class="plan-view" id="planView">
+  <div class="plan-form" id="planForm">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:24px">📋</div>
+      <div style="font-size:15px;font-weight:700;margin-top:4px">客户信息收集</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">必填项齐全后才能出方案，不猜测不编造</div>
+    </div>
+    <div class="form-group">
+      <label>预算范围（万）<span class="req">*</span></label>
+      <div class="form-row">
+        <input type="number" id="budgetMin" placeholder="最低" min="50">
+        <input type="number" id="budgetMax" placeholder="最高" min="50">
+      </div>
+      <div class="form-hint">如 250-300万</div>
+    </div>
+    <div class="form-group">
+      <label>户籍<span class="req">*</span></label>
+      <select id="huji"><option value="">请选择</option><option value="深户">深户</option><option value="非深户">非深户</option></select>
+    </div>
+    <div class="form-group">
+      <label>住房情况<span class="req">*</span></label>
+      <select id="housing"><option value="">请选择</option><option value="准备买房">准备买房</option><option value="已有学区房">已有学区房</option><option value="租房（有红本租赁凭证）">租房（有红本租赁凭证）</option><option value="租房（无租赁凭证）">租房（无租赁凭证）</option></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>小孩当前年级<span class="req">*</span></label>
+        <select id="childGrade"><option value="">请选择</option><option value="未入园">未入园</option><option value="幼儿园">幼儿园</option><option value="1年级">1年级</option><option value="2年级">2年级</option><option value="3年级">3年级</option><option value="4年级">4年级</option><option value="5年级">5年级</option><option value="6年级">6年级</option></select>
+      </div>
+      <div class="form-group">
+        <label>目标学段<span class="req">*</span></label>
+        <select id="targetLevel"><option value="">请选择</option><option value="小一">小一（小学入学）</option><option value="初一">初一（初中入学）</option></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>意向区域</label>
+      <select id="preferArea"><option value="">不限</option><option value="福田">福田</option><option value="南山">南山</option><option value="罗湖">罗湖</option><option value="龙华">龙华</option><option value="龙岗">龙岗</option><option value="宝安">宝安</option><option value="光明">光明</option></select>
+    </div>
+    <div class="form-group">
+      <label>补充说明</label>
+      <textarea id="extraInfo" rows="2" placeholder="如：社保年限、特殊需求、二胎情况等"></textarea>
+    </div>
+    <button class="submit-plan" id="submitPlan" onclick="submitPlan()">📋 生成定制方案</button>
+  </div>
+  <div class="plan-result" id="planResult">
+    <div class="plan-result-area"><div class="plan-card" id="planContent"></div></div>
+    <div class="plan-actions">
+      <button onclick="backToForm()">← 修改信息</button>
+      <button onclick="copyPlan()">📋 复制方案</button>
+      <button class="primary" onclick="newPlan()">🆕 新方案</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let quickConvId=null,planConvId=null,sending=false;
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  if(t==='quick'){document.querySelector('.tab:first-child').classList.add('active');document.getElementById('chatView').style.display='flex';document.getElementById('planView').style.display='none'}
+  else{document.querySelector('.tab:last-child').classList.add('active');document.getElementById('chatView').style.display='none';document.getElementById('planView').style.display='flex'}
+}
+function ask(q){document.getElementById('msgInput').value=q;send()}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}
+function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px'}
+function addMsg(text,type){
+  const a=document.getElementById('chatArea'),d=document.createElement('div');d.className='msg '+type;
+  let h=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/#{1,3}\s(.+)/g,'<b>$1</b>').replace(/^[-•]\s(.+)/gm,'• $1').replace(/^&gt;\s(.+)/gm,'<blockquote>$1</blockquote>').replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');
+  d.innerHTML=h;a.appendChild(d);a.scrollTop=a.scrollHeight
+}
+async function send(){
+  const i=document.getElementById('msgInput'),t=i.value.trim();if(!t||sending)return;
+  sending=true;document.getElementById('sendBtn').disabled=true;i.value='';i.style.height='auto';addMsg(t,'user');
+  const te=document.createElement('div');te.className='msg bot';te.id='typing';te.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
+  document.getElementById('chatArea').appendChild(te);document.getElementById('chatArea').scrollTop=99999;
+  try{
+    const r=await fetch('/xuequ/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,mode:'quick',conversation_id:quickConvId})});
+    const d=await r.json();document.getElementById('typing')?.remove();
+    if(d.success){if(d.conversation_id)quickConvId=d.conversation_id;addMsg(d.response,'bot')}else addMsg('⚠️ 请求失败，请稍后重试','bot')
+  }catch(e){document.getElementById('typing')?.remove();addMsg('⚠️ 网络错误','bot')}
+  sending=false;document.getElementById('sendBtn').disabled=false
+}
+function validateForm(){
+  const m=[];if(!document.getElementById('budgetMax').value)m.push('预算范围');
+  if(!document.getElementById('huji').value)m.push('户籍');if(!document.getElementById('housing').value)m.push('住房情况');
+  if(!document.getElementById('childGrade').value)m.push('小孩年级');if(!document.getElementById('targetLevel').value)m.push('目标学段');return m
+}
+async function submitPlan(){
+  const m=validateForm();if(m.length>0){showToast('⚠️ 请填写：'+m.join('、'));return}
+  const bm=document.getElementById('budgetMin').value||'0',bx=document.getElementById('budgetMax').value,
+  hj=document.getElementById('huji').value,hs=document.getElementById('housing').value,
+  cg=document.getElementById('childGrade').value,tl=document.getElementById('targetLevel').value,
+  pa=document.getElementById('preferArea').value||'不限',ei=document.getElementById('extraInfo').value||'无';
+  const p=`请出定制方案。客户情况如下：\n- 预算：${bm}-${bx}万\n- 户籍：${hj}\n- 住房：${hs}\n- 小孩年级：${cg}\n- 目标学段：${tl}\n- 意向区域：${pa}\n- 补充：${ei}`;
+  document.getElementById('submitPlan').disabled=true;document.getElementById('submitPlan').textContent='⏳ 正在生成方案...';
+  try{
+    const r=await fetch('/xuequ/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:p,mode:'plan',conversation_id:planConvId})});
+    const d=await r.json();
+    if(d.success){if(d.conversation_id)planConvId=d.conversation_id;renderPlan(d.response);document.getElementById('planForm').style.display='none';document.getElementById('planResult').style.display='flex'}
+    else showToast('⚠️ 生成失败，请重试')
+  }catch(e){showToast('⚠️ 网络错误，请重试')}
+  document.getElementById('submitPlan').disabled=false;document.getElementById('submitPlan').textContent='📋 生成定制方案'
+}
+function renderPlan(text){
+  const e=document.getElementById('planContent');
+  let h=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/#{1,3}\s(.+)/g,'<h3>$1</h3>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^[-•]\s(.+)/gm,'• $1').replace(/^&gt;\s(.+)/gm,'<blockquote>$1</blockquote>').replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');
+  e.innerHTML=h
+}
+function backToForm(){document.getElementById('planForm').style.display='block';document.getElementById('planResult').style.display='none'}
+function newPlan(){
+  ['budgetMin','budgetMax','extraInfo'].forEach(id=>document.getElementById(id).value='');
+  ['huji','housing','childGrade','targetLevel','preferArea'].forEach(id=>document.getElementById(id).value='');
+  planConvId=null;document.getElementById('planForm').style.display='block';document.getElementById('planResult').style.display='none'
+}
+function copyPlan(){navigator.clipboard.writeText(document.getElementById('planContent').innerText).then(()=>showToast('✅ 方案已复制'))}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+document.getElementById('msgInput').focus();
+</script>
+</body>
+</html>
