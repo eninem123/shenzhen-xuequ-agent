@@ -1,6 +1,7 @@
 # 深圳学位房规划智能体
 
-基于AI Agent的深圳学位房智能规划系统，提供学区查询、积分评估、购房/租房方案定制等服务。
+基于AI Agent的深圳学位房智能规划系统，提供学区查询、积分评估、购房/租房方案定制等服务。<img width="1920" height="869" alt="image" src="https://github.com/user-attachments/assets/79a1fc76-6698-407d-ac7e-8bc4a2135d6f" />
+
 
 ## 产品架构
 
