@@ -10,23 +10,37 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 .header{background:var(--card);padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .header h1{font-size:16px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1}
+.header .data-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:16px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer}
 .header .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.tabs{display:flex;background:var(--card);flex-shrink:0}
-.tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tabs{display:flex;background:var(--card);flex-shrink:0;overflow-x:auto}
+.tab{flex:1;min-width:0;padding:10px 4px;text-align:center;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.tab.plan-tab.active{color:var(--orange);border-bottom-color:var(--orange)}
-.chat-view{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.chat-area{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.tab.t-plan.active{color:var(--orange);border-bottom-color:var(--orange)}
+.tab.t-analysis.active{color:var(--green);border-bottom-color:var(--green)}
+.tab.t-about.active{color:var(--accent2);border-bottom-color:var(--accent2)}
+.tab.t-feature.active{color:#f472b6;border-bottom-color:#f472b6}
+.tab.t-backtest.active{color:#06b6d4;border-bottom-color:#06b6d4}
+.tab.t-tools.active{color:#84cc16;border-bottom-color:#84cc16}
+
+/* 共用 */
+.panel{flex:1;display:none;flex-direction:column;overflow:hidden}
+.panel.active{display:flex}
+.scroll{flex:1;overflow-y:auto;padding:16px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.scroll::-webkit-scrollbar{width:6px}
+.scroll::-webkit-scrollbar-track{background:transparent}
+.scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.scroll::-webkit-scrollbar-thumb:hover{background:var(--text2)}
 .msg{max-width:90%;padding:12px 14px;border-radius:var(--radius);font-size:14px;line-height:1.7;word-break:break-word}
 .msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px}
 .msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px}
 .msg.bot b,.msg.bot strong{color:var(--accent)}
-.msg.bot h2,.msg.bot h3{margin:8px 0 4px;font-size:14px;color:var(--orange)}
+.msg.bot h3{margin:8px 0 4px;font-size:14px;color:var(--orange)}
 .msg.bot table{width:100%;border-collapse:collapse;margin:6px 0;font-size:12px}
 .msg.bot th,.msg.bot td{border:1px solid var(--border);padding:5px 8px;text-align:left}
 .msg.bot th{background:rgba(59,130,246,.12)}
 .msg.bot blockquote{border-left:3px solid var(--accent);padding-left:8px;margin:6px 0;color:var(--text2)}
+.chat-area{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:12px}
 .quick-q{display:flex;flex-wrap:wrap;gap:6px;padding:6px 16px;flex-shrink:0}
 .quick-q button{padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:12px;cursor:pointer}
 .quick-q button:active{border-color:var(--accent);color:var(--accent)}
@@ -36,54 +50,136 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
 .input-row textarea:focus{border-color:var(--accent)}
 .send-btn{width:44px;height:44px;border-radius:var(--radius);border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .send-btn:disabled{opacity:.4}
-.plan-view{flex:1;display:none;flex-direction:column;overflow:hidden}
-.plan-form{flex:1;overflow-y:auto;padding:16px}
-.form-group{margin-bottom:14px}
-.form-group label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px}
-.form-group label .req{color:var(--red);margin-left:2px}
-.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--input);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:15px;font-family:inherit;outline:none}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
-.form-group select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
-.form-group select option{background:var(--card);color:var(--text)}
-.form-row{display:flex;gap:10px}
-.form-row .form-group{flex:1}
-.form-hint{font-size:11px;color:var(--text2);margin-top:4px}
-.submit-plan{padding:12px 16px;background:linear-gradient(135deg,var(--orange),#d97706);border:none;border-radius:var(--radius);color:#fff;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
-.submit-plan:disabled{opacity:.5;cursor:not-allowed}
-.plan-result{display:none;flex:1;flex-direction:column;overflow:hidden}
-.plan-result-area{flex:1;overflow-y:auto;padding:16px}
-.plan-card{background:var(--card);border:1px solid var(--orange);border-radius:var(--radius);padding:16px;font-size:13.5px;line-height:1.8}
-.plan-card h2{color:var(--orange);font-size:15px;margin-bottom:10px}
-.plan-card h3{color:var(--accent);font-size:14px;margin:10px 0 6px}
-.plan-card table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
-.plan-card th,.plan-card td{border:1px solid var(--border);padding:6px 8px;text-align:left}
-.plan-card th{background:rgba(245,158,11,.1)}
-.plan-card b{color:var(--orange)}
-.plan-card a{color:var(--accent)}
-.plan-actions{display:flex;gap:8px;padding:12px 16px;background:var(--card);border-top:1px solid var(--border);flex-shrink:0}
-.plan-actions button{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-weight:600;cursor:pointer}
-.plan-actions button.primary{background:linear-gradient(135deg,var(--orange),#d97706);border:none;color:#fff}
-.plan-actions button:active{transform:scale(.97)}
 .typing{display:inline-flex;gap:4px;padding:4px 0}
 .typing span{width:6px;height:6px;border-radius:50%;background:var(--text2);animation:bounce 1.4s infinite}
 .typing span:nth-child(2){animation-delay:.2s}
 .typing span:nth-child(3){animation-delay:.4s}
 @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+/* 表单 */
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.form-group label .req{color:var(--red);margin-left:2px}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--input);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:15px;font-family:inherit;outline:none}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
+.form-group select{appearance:none}
+.form-row{display:flex;gap:10px}
+.form-row .form-group{flex:1}
+.form-hint{font-size:11px;color:var(--text2);margin-top:4px}
+.submit-btn{padding:12px 16px;border:none;border-radius:var(--radius);color:#fff;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
+.btn-orange{background:linear-gradient(135deg,var(--orange),#d97706)}
+.btn-green{background:linear-gradient(135deg,var(--green),#059669)}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* 结果卡片 */
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:13.5px;line-height:1.8}
+.result-card h3{color:var(--accent);font-size:14px;margin:10px 0 6px}
+.result-card b{color:var(--orange)}
+.result-card table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px}
+.result-card th,.result-card td{border:1px solid var(--border);padding:6px 8px;text-align:left}
+.result-card th{background:rgba(59,130,246,.1)}
+.result-actions{display:flex;gap:8px;padding:12px 0;flex-shrink:0}
+.result-actions button{flex:1;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-weight:600;cursor:pointer}
+.result-actions button.primary{background:linear-gradient(135deg,var(--orange),#d97706);border:none;color:#fff}
+
+/* 学区分析 */
+.analysis-search{display:flex;gap:8px;margin-bottom:16px}
+.analysis-search input{flex:1;background:var(--input);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;color:var(--text);font-size:15px;outline:none}
+.analysis-search input:focus{border-color:var(--green)}
+.analysis-search button{padding:12px 18px;background:linear-gradient(135deg,var(--green),#059669);border:none;border-radius:var(--radius);color:#fff;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.empty-state .title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px}
+.empty-state .desc{font-size:13px;line-height:1.6}
+
+/* 产品介绍 & 功能详解 */
+.about-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px}
+.about-card h3{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.about-card p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px}
+.about-card ul{padding-left:16px;margin:6px 0}
+.about-card li{font-size:13px;color:var(--text2);margin-bottom:4px}
+.about-card li b{color:var(--text)}
+.hero-box{text-align:center;padding:24px 0 16px}
+.hero-box .icon{font-size:48px}
+.hero-box h2{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:8px 0 4px}
+.hero-box .sub{font-size:13px;color:var(--text2)}
+.hero-box .badge{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:12px;background:rgba(16,185,129,.15);color:var(--green);font-size:12px;font-weight:600}
+.pain-item{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--input);border-radius:8px;margin-bottom:8px;border-left:3px solid var(--red)}
+.pain-item .em{font-size:20px;flex-shrink:0}
+.pain-item h4{font-size:13px;font-weight:700;color:var(--red);margin-bottom:2px}
+.pain-item p{font-size:12px;color:var(--text2)}
+.sol-item{display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--input);border-radius:8px;margin-bottom:8px;border-left:3px solid var(--green)}
+.sol-item .em{font-size:20px;flex-shrink:0}
+.sol-item h4{font-size:13px;font-weight:700;color:var(--green);margin-bottom:2px}
+.sol-item p{font-size:12px;color:var(--text2)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin:12px 0}
+.stat{background:var(--input);border-radius:8px;padding:12px 4px}
+.stat .num{font-size:20px;font-weight:800;color:var(--accent)}
+.stat .label{font-size:11px;color:var(--text2);margin-top:2px}
+.demo-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin:8px 0;font-size:13px}
+.demo-box .q{color:var(--accent);font-weight:600;margin-bottom:4px}
+.demo-box .a{color:var(--text);padding-left:10px;border-left:2px solid var(--green)}
+.demo-box .a b{color:var(--orange)}
+.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.compare-box{border-radius:8px;padding:12px;font-size:12px}
+.compare-before{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)}
+.compare-before h4{color:var(--red);font-size:12px;margin-bottom:4px}
+.compare-after{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2)}
+.compare-after h4{color:var(--green);font-size:12px;margin-bottom:4px}
+.tip-box{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:10px;margin:8px 0;font-size:12px;color:var(--orange)}
+
+/* 登录 */
+.login-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;transition:opacity .3s}
+.login-overlay.hidden{opacity:0;pointer-events:none}
+.login-overlay.show{opacity:1;pointer-events:auto}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px 28px;width:90%;max-width:360px;transform:scale(.9);transition:transform .3s}
+.login-overlay.show .login-box{transform:scale(1)}
+.login-icon{text-align:center;font-size:48px;margin-bottom:12px}
+.login-title{text-align:center;font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+.login-subtitle{text-align:center;font-size:13px;color:var(--text2);margin-bottom:24px}
+.login-input{width:100%;background:var(--input);border:2px solid var(--border);border-radius:var(--radius);padding:14px 16px;color:var(--text);font-size:18px;text-align:center;letter-spacing:8px;font-family:inherit;outline:none;transition:border-color .2s}
+.login-input:focus{border-color:var(--accent)}
+.login-input.error{border-color:var(--red);animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:var(--radius);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;transition:opacity .2s}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
+.login-error{text-align:center;font-size:12px;color:var(--red);margin-top:12px;min-height:18px}
+.login-remember{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:12px;color:var(--text2)}
+.login-remember input{accent-color:var(--accent)}
 .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
-@media(max-width:480px){.msg{max-width:93%;font-size:13.5px}}
+@media(max-width:480px){.msg{max-width:93%;font-size:13.5px}.tab{font-size:11px;padding:8px 2px}}
 </style>
 </head>
 <body>
-<div class="header"><div class="dot"></div><h1>深圳学位房规划助手</h1></div>
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('quick')">⚡ 中介快答</div>
-  <div class="tab plan-tab" onclick="switchTab('plan')">📋 出方案</div>
+
+<!-- 登录弹窗 -->
+<div class="login-overlay hidden" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-icon">🔐</div>
+    <div class="login-title">学位房规划助手</div>
+    <div class="login-subtitle">请输入访问密码</div>
+    <input type="password" class="login-input" id="loginPassword" placeholder="······" maxlength="20" autofocus>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">进 入</button>
+    <div class="login-error" id="loginError"></div>
+    <label class="login-remember"><input type="checkbox" id="rememberMe" checked> 7天内免登录</label>
+  </div>
 </div>
 
-<div class="chat-view" id="chatView">
+<div class="header"><div class="dot"></div><h1>深圳学位房规划助手</h1><button class="data-btn" onclick="openDataTerminal()">📊 数据</button></div>
+<div class="tabs" id="tabs">
+  <div class="tab active" data-tab="quick">⚡ 快答</div>
+  <div class="tab t-plan" data-tab="plan">📋 出方案</div>
+  <div class="tab t-backtest" data-tab="backtest">📈 回测</div>
+  <div class="tab t-tools" data-tab="tools">🔧 工具箱</div>
+  <div class="tab t-about" data-tab="about">📚 产品指南</div>
+  <div class="tab" data-tab="data" onclick="location.href='/xuequ/data.html'" style="cursor:pointer">📊 数据大盘</div>
+</div>
+
+<!-- Tab 1: 中介快答 -->
+<div class="panel active" id="p-quick">
   <div class="chat-area" id="chatArea">
-    <div class="msg bot">您好！我是深圳学位房规划助手 🏠<br><br>⚡ <b>中介快答</b>：秒查学区、积分、价格<br>📋 <b>出方案</b>：填写客户信息后出定制方案<br><br>有什么想查的？</div>
+    <div class="msg bot">您好！我是深圳学位房规划助手 🏠<br><br>⚡ <b>快答</b>：秒查学区、积分、价格<br>📋 <b>出方案</b>：填写信息出定制方案<br>📈 <b>回测</b>：房价走势+投资分析<br>🔧 <b>工具箱</b>：积分/贷款计算器<br>📚 <b>产品指南</b>：了解工具与使用指南<br>📊 <b>数据大盘</b>：查看全市楼盘数据与排行</div>
   </div>
   <div class="quick-q">
     <button onclick="ask('300万预算能上第一梯队吗')">300万能上第一梯队吗</button>
@@ -100,122 +196,354 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   </div>
 </div>
 
-<div class="plan-view" id="planView">
-  <div class="plan-form" id="planForm">
+<!-- Tab 2: 出方案 -->
+<div class="panel" id="p-plan">
+  <div class="scroll" id="planForm">
     <div style="text-align:center;margin-bottom:16px">
       <div style="font-size:24px">📋</div>
       <div style="font-size:15px;font-weight:700;margin-top:4px">客户信息收集</div>
-      <div style="font-size:12px;color:var(--text2);margin-top:2px">必填项齐全后才能出方案，不猜测不编造</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">必填项齐全后出方案</div>
     </div>
-    <div class="form-group">
-      <label>预算范围（万）<span class="req">*</span></label>
-      <div class="form-row">
-        <input type="number" id="budgetMin" placeholder="最低" min="50">
-        <input type="number" id="budgetMax" placeholder="最高" min="50">
-      </div>
-      <div class="form-hint">如 250-300万</div>
-    </div>
-    <div class="form-group">
-      <label>户籍<span class="req">*</span></label>
-      <select id="huji"><option value="">请选择</option><option value="深户">深户</option><option value="非深户">非深户</option></select>
-    </div>
-    <div class="form-group">
-      <label>住房情况<span class="req">*</span></label>
-      <select id="housing"><option value="">请选择</option><option value="准备买房">准备买房</option><option value="已有学区房">已有学区房</option><option value="租房（有红本租赁凭证）">租房（有红本租赁凭证）</option><option value="租房（无租赁凭证）">租房（无租赁凭证）</option></select>
-    </div>
+    <div class="form-group"><label>预算范围（万）<span class="req">*</span></label><div class="form-row"><input type="number" id="budgetMin" placeholder="最低"><input type="number" id="budgetMax" placeholder="最高"></div></div>
+    <div class="form-group"><label>户籍<span class="req">*</span></label><select id="huji"><option value="">请选择</option><option>深户</option><option>非深户</option></select></div>
+    <div class="form-group"><label>住房情况<span class="req">*</span></label><select id="housing"><option value="">请选择</option><option>准备买房</option><option>已有学区房</option><option>租房（有红本租赁凭证）</option><option>租房（无租赁凭证）</option></select></div>
     <div class="form-row">
-      <div class="form-group">
-        <label>小孩当前年级<span class="req">*</span></label>
-        <select id="childGrade"><option value="">请选择</option><option value="未入园">未入园</option><option value="幼儿园">幼儿园</option><option value="1年级">1年级</option><option value="2年级">2年级</option><option value="3年级">3年级</option><option value="4年级">4年级</option><option value="5年级">5年级</option><option value="6年级">6年级</option></select>
-      </div>
-      <div class="form-group">
-        <label>目标学段<span class="req">*</span></label>
-        <select id="targetLevel"><option value="">请选择</option><option value="小一">小一（小学入学）</option><option value="初一">初一（初中入学）</option></select>
-      </div>
+      <div class="form-group"><label>小孩年级<span class="req">*</span></label><select id="childGrade"><option value="">请选择</option><option>未入园</option><option>幼儿园</option><option>1年级</option><option>2年级</option><option>3年级</option><option>4年级</option><option>5年级</option><option>6年级</option></select></div>
+      <div class="form-group"><label>目标学段<span class="req">*</span></label><select id="targetLevel"><option value="">请选择</option><option value="小一">小一</option><option value="初一">初一</option></select></div>
     </div>
-    <div class="form-group">
-      <label>意向区域</label>
-      <select id="preferArea"><option value="">不限</option><option value="福田">福田</option><option value="南山">南山</option><option value="罗湖">罗湖</option><option value="龙华">龙华</option><option value="龙岗">龙岗</option><option value="宝安">宝安</option><option value="光明">光明</option></select>
-    </div>
-    <div class="form-group">
-      <label>补充说明</label>
-      <textarea id="extraInfo" rows="2" placeholder="如：社保年限、特殊需求、二胎情况等"></textarea>
-    </div>
-    <button class="submit-plan" id="submitPlan" onclick="submitPlan()">📋 生成定制方案</button>
+    <div class="form-group"><label>意向区域</label><select id="preferArea"><option value="">不限</option><option>福田</option><option>南山</option><option>罗湖</option><option>龙华</option><option>龙岗</option><option>宝安</option><option>光明</option></select></div>
+    <div class="form-group"><label>补充说明</label><textarea id="extraInfo" rows="2" placeholder="社保年限、特殊需求等"></textarea></div>
+    <button class="submit-btn btn-orange" id="submitPlan" onclick="submitPlan()">📋 生成定制方案</button>
   </div>
-  <div class="plan-result" id="planResult">
-    <div class="plan-result-area"><div class="plan-card" id="planContent"></div></div>
-    <div class="plan-actions">
-      <button onclick="backToForm()">← 修改信息</button>
-      <button onclick="copyPlan()">📋 复制方案</button>
+  <div class="panel" id="planResult" style="display:none">
+    <div class="scroll"><div class="result-card" id="planContent"></div></div>
+    <div class="result-actions" style="padding:8px 16px 14px">
+      <button onclick="backToForm()">← 修改</button>
+      <button onclick="copyPlan()">📋 复制</button>
       <button class="primary" onclick="newPlan()">🆕 新方案</button>
     </div>
   </div>
 </div>
+
+<!-- Tab 3: 回测 -->
+<div class="panel" id="p-backtest">
+  <div class="scroll">
+    <div class="about-card">
+      <h3>📈 房价走势回测</h3>
+      <p>输入小区名，查看历史价格走势和投资收益分析。</p>
+      <div class="analysis-search">
+        <input type="text" id="backtestInput" placeholder="输入小区名，如：绿景花园">
+        <button onclick="doBacktest()">📊 回测分析</button>
+      </div>
+    </div>
+    <div id="backtestResult">
+      <div class="empty-state">
+        <div class="icon">📈</div>
+        <div class="title">输入小区名开始回测</div>
+        <div class="desc">分析历史价格走势、涨幅排名、投资收益率</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab 5: 工具箱 -->
+<div class="panel" id="p-tools">
+  <div class="scroll">
+    <div class="about-card">
+      <h3>🧮 积分计算器</h3>
+      <p>快速计算深圳购房入学积分</p>
+      <div class="form-group"><label>户籍类型</label><select id="toolHuji"><option value="shenzhen">深户</option><option value="non-shenzhen">非深户</option></select></div>
+      <div class="form-group"><label>住房性质</label><select id="toolHousing"><option value="own">自有产权房</option><option value="rent">租房</option></select></div>
+      <div class="form-group"><label>社保年限（年）</label><input type="number" id="toolShebao" value="5" min="0" max="30"></div>
+      <div class="form-group"><label>房产所在区</label><select id="toolDistrict"><option value="futian">福田区</option><option value="luohu">罗湖区</option><option value="nanshan">南山区</option><option value="longhua">龙华区</option><option value="baoan">宝安区</option><option value="longgang">龙岗区</option></select></div>
+      <button class="submit-btn btn-green" onclick="calcScore()">🧮 计算积分</button>
+      <div id="scoreResult" style="margin-top:12px"></div>
+    </div>
+
+    <div class="about-card">
+      <h3>💰 贷款计算器</h3>
+      <p>快速计算月供和总利息</p>
+      <div class="form-group"><label>贷款金额（万）</label><input type="number" id="loanAmount" placeholder="如：300"></div>
+      <div class="form-group"><label>贷款年限（年）</label><input type="number" id="loanYears" value="30" min="1" max="30"></div>
+      <div class="form-group"><label>利率（%）</label><input type="number" id="loanRate" value="3.5" step="0.1"></div>
+      <div class="form-group"><label>还款方式</label><select id="loanType"><option value="equal">等额本息</option><option value="principal">等额本金</option></select></div>
+      <button class="submit-btn btn-orange" onclick="calcLoan()">💰 计算月供</button>
+      <div id="loanResult" style="margin-top:12px"></div>
+    </div>
+
+    <div class="about-card">
+      <h3>🔄 学位锁定查询</h3>
+      <p>查询学位是否被占用</p>
+      <div class="analysis-search">
+        <input type="text" id="lockQuery" placeholder="输入小区名或学校名">
+        <button onclick="queryLock()">🔍 查询</button>
+      </div>
+      <div id="lockResult" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab 6: 产品介绍 -->
+<div class="panel" id="p-about">
+  <div class="scroll">
+    <div class="hero-box">
+      <div class="icon">🏠</div>
+      <h2>深圳学位房规划助手</h2>
+      <div class="sub">AI驱动的学区房智能分析，帮中介秒答客户、帮家长精准选房</div>
+      <div class="badge">✅ 已上线 · 深圳7区全覆盖</div>
+    </div>
+
+    <div class="about-card">
+      <h3>😤 中介的痛点</h3>
+      <div class="pain-item"><div class="em">❓</div><div><h4>客户问学区答不上来</h4><p>"对口哪个学校？第几梯队？"每次现场查，客户等不及走了</p></div></div>
+      <div class="pain-item"><div class="em">📊</div><div><h4>房价数据记不住</h4><p>"现在多少钱一平？涨了还是跌了？"靠记忆回答经常不准</p></div></div>
+      <div class="pain-item"><div class="em">📋</div><div><h4>出方案太慢</h4><p>预算、积分、学区、价格要综合考虑，手动整理至少半小时</p></div></div>
+      <div class="pain-item"><div class="em">📖</div><div><h4>政策变化跟不上</h4><p>积分规则、学位锁定年年变，一不小心给错信息</p></div></div>
+    </div>
+
+    <div class="about-card">
+      <h3>✨ 解决方案</h3>
+      <div class="sol-item"><div class="em">⚡</div><div><h4>中介快答 — 3秒出结果</h4><p>学区、积分、价格、政策，随问随答</p></div></div>
+      <div class="sol-item"><div class="em">🏫</div><div><h4>学区分析 — 一键查对口</h4><p>输入小区名，自动查对口学校、梯队、房价、积分</p></div></div>
+      <div class="sol-item"><div class="em">📋</div><div><h4>智能出方案 — 2分钟定制</h4><p>填写客户信息，AI自动生成购房方案，可复制发客户</p></div></div>
+      <div class="sol-item"><div class="em">🔄</div><div><h4>实时更新 — 政策不掉队</h4><p>学区政策、积分规则持续更新</p></div></div>
+    </div>
+
+    <div class="about-card">
+      <h3>📊 数据覆盖</h3>
+      <div class="stats-grid">
+        <div class="stat"><div class="num">10</div><div class="label">覆盖区域</div></div>
+        <div class="stat"><div class="num">3600+</div><div class="label">小区楼盘</div></div>
+        <div class="stat"><div class="num">179</div><div class="label">学校信息</div></div>
+        <div class="stat"><div class="num">3秒</div><div class="label">平均响应</div></div>
+      </div>
+    </div>
+
+    <div class="about-card">
+      <h3>⚡ 核心功能</h3>
+      <div class="sol-item"><div class="em">💬</div><div><h4>中介快答 — 秒级响应</h4><p>学区、积分、价格、政策，随问随答，客户现场提问当场秒回</p></div></div>
+      <div class="sol-item"><div class="em">📋</div><div><h4>智能出方案 — 2分钟定制</h4><p>填写客户信息，AI综合考虑预算、学区、积分，自动生成方案</p></div></div>
+      <div class="sol-item"><div class="em">📈</div><div><h4>房价回测 — 投资决策</h4><p>查看历史价格走势、年化收益率、租金回报率，辅助投资判断</p></div></div>
+      <div class="sol-item"><div class="em">🔧</div><div><h4>实用工具箱 — 一站搞定</h4><p>积分计算器、贷款计算器、学位锁定查询</p></div></div>
+      <div class="sol-item"><div class="em">📊</div><div><h4>数据终端 — 大盘概览</h4><p>全市楼盘数据、成交统计、区域房价分布，数据可视化呈现</p></div></div>
+    </div>
+
+    <div class="about-card">
+      <h3>💡 使用技巧</h3>
+      <div class="tip-box">问得越具体效果越好。"福田300万学区房"比"学区房推荐"好10倍。</div>
+      <ul>
+        <li><b>快答</b>适合现场快速提问</li>
+        <li><b>出方案</b>适合客户明确需求后定制</li>
+        <li><b>回测</b>适合投资分析和历史走势查询</li>
+        <li>所有回答可<b>一键复制</b>发微信</li>
+        <li>支持<b>追问</b>，在上一个回答基础上深挖</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
+
 <script>
+const TOKEN_KEY='xuequ_token';
+const EXPIRE_KEY='xuequ_token_expire';
+let authToken='public';
+
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
+
+// 登录
+function openDataTerminal(){window.location.href="/xuequ/data.html"}
+function hideLogin(){const o=document.getElementById('loginOverlay');o.classList.remove('show');o.classList.add('hidden');document.getElementById('loginPassword').value='';document.getElementById('loginError').textContent=''}
+function showLogin(){/* 公开访问无需登录 */}
+async function doLogin(){const p=document.getElementById('loginPassword').value,b=document.getElementById('loginBtn'),e=document.getElementById('loginError');if(!p){e.textContent='请输入密码';document.getElementById('loginPassword').classList.add('error');setTimeout(()=>document.getElementById('loginPassword').classList.remove('error'),400);return}b.disabled=true;b.textContent='验证中...';e.textContent='';try{const r=await fetch('/xuequ/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})});const d=await r.json();if(d.success){authToken=d.token;if(document.getElementById('rememberMe').checked){localStorage.setItem(TOKEN_KEY,authToken);localStorage.setItem(EXPIRE_KEY,String(Date.now()+7*24*60*60*1000))}else{sessionStorage.setItem(TOKEN_KEY,authToken)}hideLogin();showToast('✅ 登录成功')}else{e.textContent=d.message||'密码错误';document.getElementById('loginPassword').classList.add('error');document.getElementById('loginPassword').value='';setTimeout(()=>document.getElementById('loginPassword').classList.remove('error'),400)}}catch(err){e.textContent='网络错误'}b.disabled=false;b.textContent='进 入'}
+document.getElementById('loginPassword').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin()});
+// 公开访问，无需登录
+
+// Tab切换
 let quickConvId=null,planConvId=null,sending=false;
-function switchTab(t){
+document.getElementById('tabs').addEventListener('click',function(e){
+  const t=e.target.closest('.tab');if(!t)return;
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  if(t==='quick'){document.querySelector('.tab:first-child').classList.add('active');document.getElementById('chatView').style.display='flex';document.getElementById('planView').style.display='none'}
-  else{document.querySelector('.tab:last-child').classList.add('active');document.getElementById('chatView').style.display='none';document.getElementById('planView').style.display='flex'}
-}
+  t.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  if(t.dataset.tab){document.getElementById('p-'+t.dataset.tab).classList.add('active');}
+});
+
+// 快答
 function ask(q){document.getElementById('msgInput').value=q;send()}
 function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}
 function autoGrow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px'}
-function addMsg(text,type){
-  const a=document.getElementById('chatArea'),d=document.createElement('div');d.className='msg '+type;
-  let h=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/#{1,3}\s(.+)/g,'<b>$1</b>').replace(/^[-•]\s(.+)/gm,'• $1').replace(/^&gt;\s(.+)/gm,'<blockquote>$1</blockquote>').replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');
-  d.innerHTML=h;a.appendChild(d);a.scrollTop=a.scrollHeight
-}
-async function send(){
-  const i=document.getElementById('msgInput'),t=i.value.trim();if(!t||sending)return;
-  sending=true;document.getElementById('sendBtn').disabled=true;i.value='';i.style.height='auto';addMsg(t,'user');
-  const te=document.createElement('div');te.className='msg bot';te.id='typing';te.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';
-  document.getElementById('chatArea').appendChild(te);document.getElementById('chatArea').scrollTop=99999;
-  try{
-    const r=await fetch('/xuequ/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:t,mode:'quick',conversation_id:quickConvId})});
-    const d=await r.json();document.getElementById('typing')?.remove();
-    if(d.success){if(d.conversation_id)quickConvId=d.conversation_id;addMsg(d.response,'bot')}else addMsg('⚠️ 请求失败，请稍后重试','bot')
-  }catch(e){document.getElementById('typing')?.remove();addMsg('⚠️ 网络错误','bot')}
-  sending=false;document.getElementById('sendBtn').disabled=false
-}
-function validateForm(){
-  const m=[];if(!document.getElementById('budgetMax').value)m.push('预算范围');
-  if(!document.getElementById('huji').value)m.push('户籍');if(!document.getElementById('housing').value)m.push('住房情况');
-  if(!document.getElementById('childGrade').value)m.push('小孩年级');if(!document.getElementById('targetLevel').value)m.push('目标学段');return m
-}
-async function submitPlan(){
-  const m=validateForm();if(m.length>0){showToast('⚠️ 请填写：'+m.join('、'));return}
-  const bm=document.getElementById('budgetMin').value||'0',bx=document.getElementById('budgetMax').value,
-  hj=document.getElementById('huji').value,hs=document.getElementById('housing').value,
-  cg=document.getElementById('childGrade').value,tl=document.getElementById('targetLevel').value,
-  pa=document.getElementById('preferArea').value||'不限',ei=document.getElementById('extraInfo').value||'无';
-  const p=`请出定制方案。客户情况如下：\n- 预算：${bm}-${bx}万\n- 户籍：${hj}\n- 住房：${hs}\n- 小孩年级：${cg}\n- 目标学段：${tl}\n- 意向区域：${pa}\n- 补充：${ei}`;
-  document.getElementById('submitPlan').disabled=true;document.getElementById('submitPlan').textContent='⏳ 正在生成方案...';
-  try{
-    const r=await fetch('/xuequ/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:p,mode:'plan',conversation_id:planConvId})});
-    const d=await r.json();
-    if(d.success){if(d.conversation_id)planConvId=d.conversation_id;renderPlan(d.response);document.getElementById('planForm').style.display='none';document.getElementById('planResult').style.display='flex'}
-    else showToast('⚠️ 生成失败，请重试')
-  }catch(e){showToast('⚠️ 网络错误，请重试')}
-  document.getElementById('submitPlan').disabled=false;document.getElementById('submitPlan').textContent='📋 生成定制方案'
-}
-function renderPlan(text){
-  const e=document.getElementById('planContent');
-  let h=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/#{1,3}\s(.+)/g,'<h3>$1</h3>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^[-•]\s(.+)/gm,'• $1').replace(/^&gt;\s(.+)/gm,'<blockquote>$1</blockquote>').replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');
-  e.innerHTML=h
-}
+function addMsg(text,type){const a=document.getElementById('chatArea'),d=document.createElement('div');d.className='msg '+type;let h=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/#{1,3}\s(.+)/g,'<b>$1</b>').replace(/^[-•]\s(.+)/gm,'• $1').replace(/^>\s(.+)/gm,'<blockquote>$1</blockquote>').replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');d.innerHTML=h;a.appendChild(d);a.scrollTop=a.scrollHeight}
+async function send(){const i=document.getElementById('msgInput'),t=i.value.trim();if(!t||sending)return;sending=true;document.getElementById('sendBtn').disabled=true;i.value='';i.style.height='auto';addMsg(t,'user');const te=document.createElement('div');te.className='msg bot';te.id='typing';te.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';document.getElementById('chatArea').appendChild(te);document.getElementById('chatArea').scrollTop=99999;try{const r=await fetch('/xuequ/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify({message:t,mode:'quick',conversation_id:quickConvId})});if(r.status===401){document.getElementById('typing')?.remove();sending=false;document.getElementById('sendBtn').disabled=false;showToast('⚠️ 登录已过期，请重新登录');return}const d=await r.json();document.getElementById('typing')?.remove();if(d.success){if(d.conversation_id)quickConvId=d.conversation_id;addMsg(d.response,'bot')}else addMsg('⚠️ 请求失败','bot')}catch(e){document.getElementById('typing')?.remove();addMsg('⚠️ 网络错误','bot')}sending=false;document.getElementById('sendBtn').disabled=false}
+
+// 出方案
+function validateForm(){const m=[];if(!document.getElementById('budgetMax').value)m.push('预算');if(!document.getElementById('huji').value)m.push('户籍');if(!document.getElementById('housing').value)m.push('住房');if(!document.getElementById('childGrade').value)m.push('年级');if(!document.getElementById('targetLevel').value)m.push('学段');return m}
+async function submitPlan(){const m=validateForm();if(m.length>0){showToast('⚠️ 请填写：'+m.join('、'));return}const bm=document.getElementById('budgetMin').value||'0',bx=document.getElementById('budgetMax').value,hj=document.getElementById('huji').value,hs=document.getElementById('housing').value,cg=document.getElementById('childGrade').value,tl=document.getElementById('targetLevel').value,pa=document.getElementById('preferArea').value||'不限',ei=document.getElementById('extraInfo').value||'无';const p=`请出定制方案。\n- 预算：${bm}-${bx}万\n- 户籍：${hj}\n- 住房：${hs}\n- 年级：${cg}\n- 学段：${tl}\n- 区域：${pa}\n- 补充：${ei}`;document.getElementById('submitPlan').disabled=true;document.getElementById('submitPlan').textContent='⏳ 生成中...';try{const r=await fetch('/xuequ/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify({message:p,mode:'plan',conversation_id:planConvId})});if(r.status===401){document.getElementById('submitPlan').disabled=false;document.getElementById('submitPlan').textContent='📋 生成定制方案';return}const d=await r.json();if(d.success){if(d.conversation_id)planConvId=d.conversation_id;renderPlan(d.response);document.getElementById('planForm').style.display='none';document.getElementById('planResult').style.display='flex'}else showToast('⚠️ 生成失败')}catch(e){showToast('⚠️ 网络错误')}document.getElementById('submitPlan').disabled=false;document.getElementById('submitPlan').textContent='📋 生成定制方案'}
+function renderPlan(text){const e=document.getElementById('planContent');let h=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/#{1,3}\s(.+)/g,'<h3>$1</h3>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^[-•]\s(.+)/gm,'• $1').replace(/\n{2,}/g,'<br><br>').replace(/\n/g,'<br>');e.innerHTML=h}
 function backToForm(){document.getElementById('planForm').style.display='block';document.getElementById('planResult').style.display='none'}
-function newPlan(){
-  ['budgetMin','budgetMax','extraInfo'].forEach(id=>document.getElementById(id).value='');
-  ['huji','housing','childGrade','targetLevel','preferArea'].forEach(id=>document.getElementById(id).value='');
-  planConvId=null;document.getElementById('planForm').style.display='block';document.getElementById('planResult').style.display='none'
+function newPlan(){['budgetMin','budgetMax','extraInfo'].forEach(id=>document.getElementById(id).value='');['huji','housing','childGrade','targetLevel','preferArea'].forEach(id=>document.getElementById(id).value='');planConvId=null;document.getElementById('planForm').style.display='block';document.getElementById('planResult').style.display='none'}
+function copyPlan(){navigator.clipboard.writeText(document.getElementById('planContent').innerText).then(()=>showToast('✅ 已复制'))}
+
+// 学区分析
+async function doAnalysis(){const q=document.getElementById('analysisInput').value.trim();if(!q)return;const el=document.getElementById('analysisResult');el.innerHTML='<div class="empty-state"><div class="icon">🔍</div><div class="title">正在分析「'+q+'」...</div></div>';try{const r=await fetch('/xuequ/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify({message:`学区分析：请对小区「${q}」做全面分析，包括对口学校、梯队排名、均价走势、入学积分、周边配套、政策。用表格和数据呈现。`,mode:'analysis',conversation_id:null})});if(r.status===401){el.innerHTML='<div class="empty-state"><div class="icon">⚠️</div><div class="title">请先登录</div></div>';return}const d=await r.json();if(d.success){let h=d.response.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/#{1,3}\\s(.+)/g,'<h3 style="color:var(--green);margin:10px 0 4px;font-size:14px">$1</h3>').replace(/\\*\\*(.+?)\\*\\*/g,'<b>$1</b>').replace(/\\n{2,}/g,'<br><br>').replace(/\\n/g,'<br>');el.innerHTML='<div class="result-card"><h3 style="color:var(--green)">🏫 '+q+' 学区分析</h3>'+h+'</div>'}else el.innerHTML='<div class="empty-state"><div class="icon">⚠️</div><div class="title">分析失败</div></div>'}catch(e){el.innerHTML='<div class="empty-state"><div class="icon">⚠️</div><div class="title">网络错误</div></div>'}}
+
+// 回测
+async function doBacktest(){const q=document.getElementById('backtestInput').value.trim();if(!q)return;const el=document.getElementById('backtestResult');el.innerHTML='<div class="empty-state"><div class="icon">🔍</div><div class="title">正在回测「'+q+'」...</div></div>';try{const r=await fetch('/xuequ/backtest/'+encodeURIComponent(q));if(r.status===404){el.innerHTML='<div class="empty-state"><div class="icon">⚠️</div><div class="title">未找到该小区数据</div><div class="desc">请检查小区名是否正确，或尝试其他小区</div></div>';return}const d=await r.json();if(d&&d.backtest_results){el.innerHTML=renderBacktestResult(d)}else el.innerHTML='<div class="empty-state"><div class="icon">⚠️</div><div class="title">回测失败</div><div class="desc">暂无数据</div></div>'}catch(e){el.innerHTML='<div class="empty-state"><div class="icon">⚠️</div><div class="title">网络错误</div></div>'}}
+function renderBacktestResult(data){const s=data.summary||{};const best=data.best_case||{};const worst=data.worst_case||{};const info=data.info||{};const results=data.backtest_results||[];
+// 找保守型作为基准展示
+const base=results.find(r=>r.strategy==='A_保守型')||results[0]||{};
+const posColor=s.positive_scenarios>s.negative_scenarios?'var(--green)':'var(--red)';
+let h='<div class="result-card" style="margin-bottom:12px"><h3 style="color:#06b6d4">📈 '+data.property+' 投资回测</h3>';
+// 基本信息
+if(info.current_price){h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0;text-align:center">';
+h+='<div style="background:var(--input);border-radius:8px;padding:8px 4px"><div style="font-size:16px;font-weight:700;color:var(--accent)">'+info.current_price+'万</div><div style="font-size:11px;color:var(--text2)">当前总价</div></div>';
+if(info.area_sqm)h+='<div style="background:var(--input);border-radius:8px;padding:8px 4px"><div style="font-size:16px;font-weight:700;color:var(--accent)">'+Math.round(info.current_price*10000/info.area_sqm)+'</div><div style="font-size:11px;color:var(--text2)">单价(元/㎡)</div></div>';
+if(info.current_rent)h+='<div style="background:var(--input);border-radius:8px;padding:8px 4px"><div style="font-size:16px;font-weight:700;color:var(--green)">'+info.current_rent+'</div><div style="font-size:11px;color:var(--text2)">月租金(元)</div></div>';
+h+='</div>';}
+// 汇总统计
+h+='<h4 style="color:var(--accent);margin:12px 0 8px;font-size:13px">📊 回测概览</h4>';
+h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0;text-align:center">';
+h+='<div style="background:var(--input);border-radius:8px;padding:8px 4px"><div style="font-size:16px;font-weight:700;color:var(--accent)">'+s.total_scenarios+'</div><div style="font-size:10px;color:var(--text2)">回测场景</div></div>';
+h+='<div style="background:var(--input);border-radius:8px;padding:8px 4px"><div style="font-size:16px;font-weight:700;color:'+posColor+'">'+(s.avg_roi!=null?s.avg_roi.toFixed(1)+'%':'-')+'</div><div style="font-size:10px;color:var(--text2)">平均ROI</div></div>';
+h+='<div style="background:var(--input);border-radius:8px;padding:8px 4px"><div style="font-size:16px;font-weight:700;color:var(--green)">'+s.positive_scenarios+'</div><div style="font-size:10px;color:var(--text2)">盈利场景</div></div>';
+h+='<div style="background:var(--input);border-radius:8px;padding:8px 4px"><div style="font-size:16px;font-weight:700;color:var(--red)">'+s.negative_scenarios+'</div><div style="font-size:10px;color:var(--text2)">亏损场景</div></div>';
+h+='</div>';
+// 基准场景详情
+if(base.strategy){
+h+='<h4 style="color:var(--accent);margin:12px 0 8px;font-size:13px">🏠 基准场景（'+base.strategy.replace(/^[A-Z]_/,'')+'）</h4>';
+h+='<div style="background:var(--input);border-radius:8px;padding:12px;font-size:12px;line-height:1.9">';
+h+='<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">市场环境</span><span>'+(base.scenario||'-')+'</span></div>';
+h+='<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">持有周期</span><span>'+(base.period||'-')+'</span></div>';
+h+='<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">买入价</span><span>'+(base.buy_price?base.buy_price+'万':'-')+'</span></div>';
+h+='<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">卖出价</span><span>'+(base.sell_price?base.sell_price+'万':'-')+'</span></div>';
+h+='<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">首付</span><span>'+(base.down_payment?base.down_payment+'万':'-')+'</span></div>';
+h+='<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">累计租金</span><span>'+(base.total_rent?base.total_rent+'万':'-')+'</span></div>';
+h+='<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">净利润</span><span style="color:'+(base.net_profit>=0?'var(--green)':'var(--red)')+';font-weight:600">'+(base.net_profit!=null?base.net_profit+'万':'-')+'</span></div>';
+h+='<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">投资回报率</span><span style="color:'+(base.roi>=0?'var(--green)':'var(--red)')+';font-weight:600">'+(base.roi!=null?base.roi.toFixed(1)+'%':'-')+'</span></div>';
+h+='<div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">年化收益率</span><span style="color:'+(base.annual_roi>=0?'var(--green)':'var(--red)')+';font-weight:600">'+(base.annual_roi!=null?base.annual_roi.toFixed(1)+'%':'-')+'</span></div>';
+h+='</div>';}
+// 最佳vs最差
+h+='<h4 style="color:var(--accent);margin:12px 0 8px;font-size:13px">⚖️ 最优 vs 最差场景</h4>';
+h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+h+='<div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px;font-size:12px">';
+h+='<div style="color:var(--green);font-weight:600;margin-bottom:6px">🚀 最佳场景</div>';
+h+='<div style="color:var(--text2);margin-bottom:4px">'+(best.scenario||'-')+'</div>';
+h+='<div style="font-size:18px;font-weight:700;color:var(--green)">'+(best.roi!=null?best.roi.toFixed(1)+'%':'-')+'</div>';
+h+='<div style="color:var(--text2);font-size:11px">ROI · '+(best.period||'')+'</div>';
+h+='</div>';
+h+='<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px;font-size:12px">';
+h+='<div style="color:var(--red);font-weight:600;margin-bottom:6px">📉 最差场景</div>';
+h+='<div style="color:var(--text2);margin-bottom:4px">'+(worst.scenario||'-')+'</div>';
+h+='<div style="font-size:18px;font-weight:700;color:var(--red)">'+(worst.roi!=null?worst.roi.toFixed(1)+'%':'-')+'</div>';
+h+='<div style="color:var(--text2);font-size:11px">ROI · '+(worst.period||'')+'</div>';
+h+='</div></div>';
+// 各策略对比
+if(data.strategy_groups&&data.strategy_groups.length>0){
+h+='<h4 style="color:var(--accent);margin:12px 0 8px;font-size:13px">📋 各策略年化收益对比</h4>';
+h+='<div style="background:var(--input);border-radius:8px;padding:10px;font-size:12px">';
+data.strategy_groups.forEach(g=>{
+const avgRoi=g.scenarios.reduce((sum,s)=>sum+s.annual_roi,0)/g.scenarios.length;
+const color=avgRoi>=0?'var(--green)':'var(--red)';
+h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">';
+h+='<div><div style="font-weight:500">'+g.name.replace(/^[A-Z]_/,'')+'</div><div style="color:var(--text2);font-size:11px">'+g.desc+'</div></div>';
+h+='<div style="color:'+color+';font-weight:600">'+avgRoi.toFixed(1)+'%</div>';
+h+='</div>';
+});
+h+='</div>';}
+h+='<div class="form-hint" style="margin-top:12px">⚠️ 回测基于历史数据，不代表未来走势；仅供投资参考</div>';
+h+='</div>';
+return h}
+
+// 积分计算器
+function calcScore(){
+  const huji=document.getElementById('toolHuji').value;
+  const housing=document.getElementById('toolHousing').value;
+  const shebao=parseInt(document.getElementById('toolShebao').value)||0;
+  const district=document.getElementById('toolDistrict').value;
+  
+  let score=0;
+  let details=[];
+  
+  // 户籍基础分
+  if(huji==='shenzhen'){score+=30;details.push('深户：+30分')}else{score+=10;details.push('非深户：+10分')}
+  
+  // 住房分
+  if(housing==='own'){score+=40;details.push('自有产权房：+40分')}else{score+=20;details.push('租房：+20分')}
+  
+  // 社保加分（每年1分，最高15分）
+  const shebaoScore=Math.min(shebao,15);
+  score+=shebaoScore;
+  details.push('社保加分：+'+shebaoScore+'分');
+  
+  // 区域特殊加分
+  const districtBonus={'futian':5,'nanshan':5,'luohu':3,'longhua':3,'baoan':3,'longgang':2};
+  const bonus=districtBonus[district]||0;
+  score+=bonus;
+  details.push('区域加分：+'+bonus+'分');
+  
+  let level='';
+  let color='';
+  if(score>=80){level='一梯队稳录';color='var(--green)'}
+  else if(score>=70){level='二梯队较稳';color='var(--accent)'}
+  else if(score>=60){level='三梯队有希望';color='var(--orange)'}
+  else{level='积分偏低，需关注补录';color='var(--red)'}
+  
+  const el=document.getElementById('scoreResult');
+  el.innerHTML='<div class="result-card"><h3 style="color:'+color+'">🧮 积分测算结果</h3><div style="font-size:28px;font-weight:700;color:'+color+';text-align:center;margin:12px 0">'+score+'分</div><div style="text-align:center;font-size:14px;color:'+color+';margin-bottom:12px">'+level+'</div><ul>'+details.map(d=>'<li>'+d+'</li>').join('')+'</ul><div class="form-hint" style="margin-top:8px">⚠️ 仅供参考，实际积分以教育局核定为准</div></div>';
 }
-function copyPlan(){navigator.clipboard.writeText(document.getElementById('planContent').innerText).then(()=>showToast('✅ 方案已复制'))}
-function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-document.getElementById('msgInput').focus();
+
+// 贷款计算器
+function calcLoan(){
+  const amount=parseFloat(document.getElementById('loanAmount').value);
+  const years=parseInt(document.getElementById('loanYears').value)||30;
+  const rate=parseFloat(document.getElementById('loanRate').value)||3.5;
+  const type=document.getElementById('loanType').value;
+  
+  if(!amount||amount<=0){showToast('⚠️ 请输入贷款金额');return}
+  
+  const monthlyRate=rate/100/12;
+  const totalMonths=years*12;
+  const totalAmount=amount*10000; // 转换为元
+  
+  let monthlyPayment=0;
+  let totalInterest=0;
+  let firstMonth=0;
+  let lastMonth=0;
+  
+  if(type==='equal'){
+    // 等额本息
+    monthlyPayment=totalAmount*monthlyRate*Math.pow(1+monthlyRate,totalMonths)/(Math.pow(1+monthlyRate,totalMonths)-1);
+    totalInterest=monthlyPayment*totalMonths-totalAmount;
+  }else{
+    // 等额本金
+    const monthlyPrincipal=totalAmount/totalMonths;
+    firstMonth=monthlyPrincipal+totalAmount*monthlyRate;
+    lastMonth=monthlyPrincipal+monthlyPrincipal*monthlyRate;
+    totalInterest=(firstMonth+lastMonth)*totalMonths/2-totalAmount;
+  }
+  
+  const el=document.getElementById('loanResult');
+  let html='<div class="result-card"><h3 style="color:var(--orange)">💰 贷款计算结果</h3>';
+  
+  if(type==='equal'){
+    html+='<div style="text-align:center;margin:12px 0"><div style="font-size:12px;color:var(--text2)">每月月供</div><div style="font-size:28px;font-weight:700;color:var(--orange)">'+monthlyPayment.toFixed(2)+'元</div></div>';
+  }else{
+    html+='<div style="text-align:center;margin:12px 0"><div style="font-size:12px;color:var(--text2)">首月月供</div><div style="font-size:28px;font-weight:700;color:var(--orange)">'+firstMonth.toFixed(2)+'元</div><div style="font-size:12px;color:var(--text2);margin-top:4px">末月月供：'+lastMonth.toFixed(2)+'元</div></div>';
+  }
+  
+  html += '<table style="width:100%;font-size:13px"><tr><td style="padding:6px 0;color:var(--text2)">贷款总额</td><td style="text-align:right;font-weight:600">' + totalAmount.toLocaleString() + '元</td></tr>';
+  html += '<tr><td style="padding:6px 0;color:var(--text2)">贷款期限</td><td style="text-align:right;font-weight:600">' + years + '年（' + totalMonths + '期）</td></tr>';
+  html += '<tr><td style="padding:6px 0;color:var(--text2)">贷款利率</td><td style="text-align:right;font-weight:600">' + rate.toFixed(2) + '%</td></tr>';
+  html += '<tr><td style="padding:6px 0;color:var(--text2)">总支付利息</td><td style="text-align:right;font-weight:600;color:var(--orange)">' + Math.round(totalInterest).toLocaleString() + '元</td></tr>';
+  html += '<tr><td style="padding:6px 0;color:var(--text2)">还款总额</td><td style="text-align:right;font-weight:600">' + Math.round(totalAmount+totalInterest).toLocaleString() + '元</td></tr>';
+  html += '</table></div>';
+  el.innerHTML = html;
+}
+
+// 页面初始化
+checkSavedToken();
 </script>
+
 </body>
 </html>
