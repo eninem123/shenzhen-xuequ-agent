@@ -8,7 +8,8 @@
 web/
 ├── frontend/
 │   ├── index.html      # 主站（唯一源码，改这里）
-│   └── data.html       # 数据大盘（唯一源码，改这里）
+│   ├── data.html       # 数据大盘（唯一源码，改这里）
+│   └── properties.html # 楼盘库（唯一源码，改这里）
 ├── sync-frontend.sh    # 同步 frontend → /var/www/xuequ（日常部署）
 ├── deploy.sh           # 一键全量部署
 ├── backend/main.py     # FastAPI 后端
@@ -25,6 +26,7 @@ web/
 # 1. 编辑源码
 vim web/frontend/index.html
 vim web/frontend/data.html
+vim web/frontend/properties.html
 
 # 2. 提交到 Git
 git add web/frontend/

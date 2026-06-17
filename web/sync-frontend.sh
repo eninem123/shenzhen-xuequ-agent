@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FRONTEND_DIR="$SCRIPT_DIR/frontend"
 TARGET_DIR="/var/www/xuequ"
 
-FILES=(index.html data.html)
+FILES=(index.html data.html properties.html)
 
 echo "============================================"
 echo "同步前端: $FRONTEND_DIR -> $TARGET_DIR"
