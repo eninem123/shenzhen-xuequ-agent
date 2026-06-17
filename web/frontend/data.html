@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>深圳学位房数据大盘</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-primary: #0a0e13;
+  --bg-secondary: #0f151d;
+  --bg-card: #111823;
+  --border-color: rgba(255,255,255,0.06);
+  --text-primary: #e8ecf1;
+  --text-secondary: #8a94a6;
+  --text-tertiary: #5a6478;
+  --accent-blue: #3b82f6;
+  --accent-green: #10b981;
+  --accent-gold: #c9a962;
+  --accent-orange: #f59e0b;
+  --accent-red: #ef4444;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+.container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+/* 顶部标题 */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 20px; border-bottom: 1px solid var(--border-color);
+  margin-bottom: 24px;
+}
+.logo { font-size: 20px; font-weight: 700; }
+.logo span { color: var(--accent-blue); }
+.update-time { font-size: 12px; color: var(--text-tertiary); }
+.header-meta { display: flex; align-items: center; gap: 10px; }
+.data-status {
+  font-size: 11px;
+  color: #93c5fd;
+  border: 1px solid rgba(59,130,246,0.35);
+  background: rgba(59,130,246,0.12);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+.data-status.ok {
+  color: #86efac;
+  border-color: rgba(16,185,129,0.45);
+  background: rgba(16,185,129,0.16);
+}
+.data-status.warn {
+  color: #fcd34d;
+  border-color: rgba(245,158,11,0.45);
+  background: rgba(245,158,11,0.14);
+}
+.data-status.error {
+  color: #fca5a5;
+  border-color: rgba(239,68,68,0.45);
+  background: rgba(239,68,68,0.14);
+}
+
+/* 统计卡片 */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 20px; transition: all 0.2s;
+}
+.stat-card:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-2px); }
+.stat-card.clickable { cursor: pointer; }
+.stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.metric-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-color);
+  margin-left: 6px;
+  cursor: help;
+}
+.stat-value { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat-value.blue { color: var(--accent-blue); }
+.stat-value.gold { color: var(--accent-gold); }
+.stat-value.green { color: var(--accent-green); }
+.stat-value.orange { color: var(--accent-orange); }
+.stat-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+/* 图表区域 */
+.charts-row {
+  display: grid; grid-template-columns: 2fr 1fr; gap: 16px;
+  margin-bottom: 24px;
+}
+.chart-card {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 20px;
+}
+.chart-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.chart-title::before { content: ''; width: 3px; height: 14px; background: var(--accent-blue); border-radius: 2px; }
+.chart-container { width: 100%; height: 280px; }
+.chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #8a94a6;
+  font-size: 13px;
+}
+.chart-empty-actions { margin-top: 8px; text-align: center; }
+.retry-btn {
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.retry-btn:hover { color: var(--accent-blue); border-color: rgba(59,130,246,0.5); }
+.retry-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  color: var(--text-tertiary);
+  border-color: var(--border-color);
+}
+.insight-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 12px;
+}
+.insight-item {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.insight-item strong { color: var(--text-primary); font-weight: 600; }
+
+/* 筛选栏 */
+.filter-bar {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 16px; margin-bottom: 16px;
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+}
+.filter-item { display: flex; flex-direction: column; gap: 4px; }
+.filter-label { font-size: 11px; color: var(--text-tertiary); }
+.filter-item select, .filter-item input {
+  background: var(--bg-primary); border: 1px solid var(--border-color);
+  color: var(--text-primary); padding: 8px 12px; border-radius: 6px;
+  font-size: 13px; outline: none; min-width: 120px;
+  font-family: inherit;
+}
+.filter-item select:focus, .filter-item input:focus { border-color: var(--accent-blue); }
+.search-box { flex: 1; min-width: 200px; }
+.search-box input { width: 100%; }
+
+/* 小区列表 */
+.community-list {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 12px; overflow: hidden;
+}
+.list-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.list-title { font-size: 14px; font-weight: 600; }
+.list-count { font-size: 12px; color: var(--text-tertiary); }
+
+
+.community-name { font-weight: 500; color: var(--text-primary); cursor: pointer; }
+.community-name:hover { color: var(--accent-blue); }
+.community-zone { color: var(--text-secondary); font-size: 12px; }
+.price-num { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--accent-gold); }
+.avg-rent { color: var(--accent-green); font-weight: 500; }
+.rental-yield { color: var(--text-secondary); font-size: 12px; }
+
+/* 分页 */
+.pagination {
+  padding: 16px 20px; display: flex; justify-content: center; gap: 4px;
+  border-top: 1px solid var(--border-color);
+}
+.pagination button {
+  padding: 6px 12px; background: var(--bg-primary);
+  border: 1px solid var(--border-color); color: var(--text-secondary);
+  border-radius: 6px; cursor: pointer; font-size: 12px;
+  font-family: inherit;
+}
+.pagination button:hover:not(:disabled) { border-color: var(--accent-blue); color: var(--accent-blue); }
+.pagination button.active { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+.pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* 详情弹窗 */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: 16px; width: 90%; max-width: 600px;
+  max-height: 80vh; overflow-y: auto;
+}
+.modal-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border-color);
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; background: var(--bg-card); z-index: 1;
+}
+.modal-title { font-size: 18px; font-weight: 600; }
+.modal-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bg-primary); border: 1px solid var(--border-color);
+  color: var(--text-secondary); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: var(--text-primary); border-color: var(--text-tertiary); }
+.modal-body { padding: 24px; }
+.detail-section { margin-bottom: 20px; }
+.detail-section h4 {
+  font-size: 13px; color: var(--text-secondary); margin-bottom: 10px;
+  font-weight: 500; display: flex; align-items: center; gap: 6px;
+}
+.detail-section h4::before {
+  content: ''; width: 2px; height: 12px; background: var(--accent-blue); border-radius: 1px;
+}
+.detail-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+.detail-item {
+  background: var(--bg-primary); border-radius: 8px; padding: 12px;
+}
+.detail-item .label { font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px; }
+.detail-item .value { font-size: 15px; font-weight: 600; }
+.detail-item .value.gold { color: var(--accent-gold); }
+.detail-item .value.green { color: var(--accent-green); }
+
+/* 骨架屏 */
+.skeleton {
+  background: linear-gradient(90deg, var(--card) 25%, #2d3a4f 50%, var(--card) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+}
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton-card {
+  height: 80px;
+  border-radius: var(--radius);
+  margin-bottom: 0;
+}
+.skeleton-chart {
+  height: 300px;
+  border-radius: var(--radius);
+}
+.skeleton-text {
+  height: 14px;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+.skeleton-title {
+  height: 18px;
+  width: 40%;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+/* 加载状态 */
+.loading {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 60px 20px; color: var(--text-tertiary);
+}
+.loading-spinner {
+  width: 32px; height: 32px; border: 2px solid var(--border-color);
+  border-top-color: var(--accent-blue); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin-bottom: 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .container { padding: 12px; }
+  .header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
+  .nav { width: 100%; justify-content: flex-start; overflow-x: auto; }
+  .nav-link { flex-shrink: 0; font-size: 13px; padding: 4px 10px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-card { padding: 12px; }
+  .stat-label { font-size: 12px; }
+  .stat-value { font-size: 20px; }
+  .stat-sub { font-size: 11px; }
+  .charts-row { grid-template-columns: 1fr; }
+  .chart-card { padding: 12px; }
+  .chart-title { font-size: 14px; }
+  .chart-container { height: 240px; }
+  .detail-grid { grid-template-columns: repeat(2, 1fr); }
+  .insight-bar { grid-template-columns: 1fr; }
+  .update-time { font-size: 11px; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+/* 数据大盘专属：隐藏浏览类元素 */
+.filter-bar { display: none !important; }
+.community-list { display: none !important; }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- 顶部 -->
+  <div class="header">
+    <div class="logo" style="cursor:pointer" onclick="location.href='/'">深圳学位房<span>数据大盘</span></div>
+    <div class="nav">
+      <a href="/xuequ/" class="nav-link">首页</a>
+      <a href="/xuequ/data.html" class="nav-link active">数据大盘</a>
+      <a href="/xuequ/properties.html" class="nav-link">楼盘库</a>
+    </div>
+    <div class="header-meta">
+      <span class="data-status" id="dataStatus">数据加载中</span>
+      <div class="update-time" id="updateTime">加载中...</div>
+    </div>
+  </div>
+
+  <!-- 统计卡片 -->
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card clickable" data-scroll-target="zoneChart">
+      <div class="stat-label">总记录数<span class="metric-help" title="已纳入统计的数据条目总数">i</span></div>
+      <div class="stat-value blue loading" id="totalRecords">-</div>
+      <div class="stat-sub">数据来源：深圳政府开放平台</div>
+    </div>
+    <div class="stat-card clickable" data-scroll-target="projectZoneChart">
+      <div class="stat-label">覆盖小区<span class="metric-help" title="当前可统计到的小区样本数量">i</span></div>
+      <div class="stat-value gold loading" id="totalCommunities">-</div>
+      <div class="stat-sub">二手住房成交参考价目录</div>
+    </div>
+    <div class="stat-card clickable" data-scroll-target="zonePriceChart">
+      <div class="stat-label">覆盖区域</div>
+      <div class="stat-value green loading" id="totalZones">-</div>
+      <div class="stat-sub">深圳全市行政区</div>
+    </div>
+    <div class="stat-card clickable" data-scroll-target="rentalYieldChart">
+      <div class="stat-label">平均租金回报率<span class="metric-help" title="按现有样本估算，非投资建议">i</span></div>
+      <div class="stat-value green loading" id="avgRentalYield">-</div>
+      <div class="stat-sub" id="rentalSource">估算数据</div>
+    </div>
+  </div>
+
+  <div class="insight-bar" id="insightBar">
+    <div class="insight-item"><strong>数据提示：</strong>全部指标仅基于现有数据计算，不新增外部样本。</div>
+    <div class="insight-item"><strong>口径提示：</strong>均价单位为元/㎡，月租金单位为元/月。</div>
+    <div class="insight-item"><strong>使用建议：</strong>先看区域分布，再结合走势判断流动性。</div>
+  </div>
+
+  <!-- 图表区域 第一行 -->
+  <div class="charts-row">
+    <div class="chart-card" id="zoneChartCard">
+      <div class="chart-title">各区域成交记录分布</div>
+      <div class="chart-container" id="zoneChart"></div>
+    </div>
+    <div class="chart-card" id="projectZoneChartCard">
+      <div class="chart-title">各区域楼盘数量分布</div>
+      <div class="chart-container" id="projectZoneChart"></div>
+    </div>
+  </div>
+
+  <!-- 图表区域 第二行 -->
+  <div class="charts-row">
+    <div class="chart-card" id="zonePriceChartCard">
+      <div class="chart-title">各区域均价对比</div>
+      <div class="chart-container" id="zonePriceChart"></div>
+    </div>
+    <div class="chart-card" id="topPriceChartCard">
+      <div class="chart-title">小区均价 TOP 10</div>
+      <div class="chart-container" id="topPriceChart"></div>
+    </div>
+  </div>
+
+  
+  <!-- 图表区域 第三行 -->
+  <div class="charts-row">
+    <div class="chart-card" id="trendChartCard">
+      <div class="chart-title">成交走势（按月）</div>
+      <div class="chart-container" id="trendChart"></div>
+    </div>
+    <div class="chart-card" id="priceDistChartCard">
+      <div class="chart-title">价格区间分布</div>
+      <div class="chart-container" id="priceDistChart"></div>
+    </div>
+  </div>
+
+  <!-- 第四行：租金回报率 + 面积分布 -->
+  <div class="charts-row">
+    <div class="chart-card" id="rentalYieldChartCard">
+      <div class="chart-title">各区域租金回报率对比</div>
+      <div class="chart-container" id="rentalYieldChart"></div>
+    </div>
+    <div class="chart-card" id="areaDistChartCard">
+      <div class="chart-title">成交面积分布</div>
+      <div class="chart-container" id="areaDistChart"></div>
+    </div>
+  </div>
+
+<!-- 筛选栏 -->
+  <div class="filter-bar">
+    <div class="filter-item search-box">
+      <div class="filter-label">搜索小区</div>
+      <input type="text" id="searchInput" placeholder="输入小区名称..." oninput="handleSearch()">
+    </div>
+    <div class="filter-item">
+      <div class="filter-label">所属区域</div>
+      <select id="zoneFilter" onchange="applyFilters()">
+        <option value="">全部区域</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <div class="filter-label">价格区间 (万/㎡)</div>
+      <select id="priceFilter" onchange="applyFilters()">
+        <option value="">全部价格</option>
+        <option value="0-3">3万以下</option>
+        <option value="3-5">3-5万</option>
+        <option value="5-7">5-7万</option>
+        <option value="7-10">7-10万</option>
+        <option value="10-15">10-15万</option>
+        <option value="15-20">15-20万</option>
+        <option value="20-999">20万以上</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <div class="filter-label">排序方式</div>
+      <select id="sortBy" onchange="applyFilters()">
+        <option value="price_desc">均价从高到低</option>
+        <option value="price_asc">均价从低到高</option>
+        <option value="name_asc">名称升序</option>
+        <option value="name_desc">名称降序</option>
+      </select>
+    </div>
+  </div>
+
+    <!-- 核心指标汇总 -->
+  <div class="section">
+    <h2>📊 核心指标汇总</h2>
+    <div class="stats-grid" id="summaryStats">
+      <div class="stat-card clickable" data-scroll-target="zonePriceChart">
+        <div class="num" id="summaryAvgPrice">--</div>
+        <div class="label">全市均价</div>
+        <div class="sub" id="summaryAvgPriceSub">元/㎡</div>
+      </div>
+      <div class="stat-card clickable" data-scroll-target="rentalYieldChart">
+        <div class="num" id="summaryAvgRent">--</div>
+        <div class="label">平均月租金</div>
+        <div class="sub" id="summaryAvgRentSub">元/月</div>
+      </div>
+      <div class="stat-card clickable" data-scroll-target="rentalYieldChart">
+        <div class="num" id="summaryYield">--</div>
+        <div class="label">平均租金回报率</div>
+        <div class="sub" id="summaryYieldSub">年化</div>
+      </div>
+      <div class="stat-card clickable" data-scroll-target="trendChart">
+        <div class="num" id="summaryTransactionCount">--</div>
+        <div class="label">总成交笔数</div>
+        <div class="sub" id="summaryTransactionCountSub">2024-2026</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 区域排行 -->
+  <div class="section">
+    <h2>🏆 区域核心指标排行</h2>
+    <div class="ranking-grid" id="zoneRanking">
+      <div class="loading">加载中...</div>
+    </div>
+  </div>
+
+  <!-- 成交周期与流动性 -->
+  <div class="section">
+    <h2>📈 成交周期与流动性</h2>
+    <div class="stats-grid" id="liquidityStats">
+      <div class="stat-card clickable" data-scroll-target="areaDistChart">
+        <div class="num" id="avgTransactionArea">--</div>
+        <div class="label">平均成交面积</div>
+        <div class="sub" id="avgTransactionAreaSub">㎡</div>
+      </div>
+      <div class="stat-card clickable" data-scroll-target="areaDistChart">
+        <div class="num" id="totalTransactionArea">--</div>
+        <div class="label">总成交面积</div>
+        <div class="sub" id="totalTransactionAreaSub">万㎡</div>
+      </div>
+      <div class="stat-card clickable" data-scroll-target="rentalYieldChart">
+        <div class="num" id="realRentCount">--</div>
+        <div class="label">真实租金数据</div>
+        <div class="sub" id="realRentCountSub">个楼盘</div>
+      </div>
+      <div class="stat-card clickable" data-scroll-target="rentalYieldChart">
+        <div class="num" id="rentalCoverage">--</div>
+        <div class="label">租金覆盖率</div>
+        <div class="sub" id="rentalCoverageSub">%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 数据来源说明 -->
+  <div class="section">
+    <h2>📋 数据说明</h2>
+    <div style="font-size:12px;color:var(--text2);line-height:1.8;">
+      <p>• 数据来源：深圳市政府公开数据 + 贝壳/乐有家真实成交</p>
+      <p>• 覆盖范围：全市6大行政区，7,653个楼盘</p>
+      <p>• 更新频率：每日自动更新</p>
+      <p>• 租金数据：真实租金6个楼盘 + 区域租售比估算</p>
+      <p>• 回测引擎：基于历史成交数据，支持任意楼盘回测</p>
+    </div>
+  </div>
+</div>
+
+<!-- 详情弹窗 -->
+<!-- 详情弹窗 -->
+<div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">小区详情</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <!-- 动态填充 -->
+    </div>
+  </div>
+</div>
+
+<script>
+// 全局数据
+let zoneChart=null;let topPriceChart=null;let projectZoneChart=null;let zonePriceChart=null;let trendChart=null;let priceDistChart=null;let rentalYieldChart=null;let areaDistChart=null;let allCommunities = [];
+let communitiesLoading = true; // 小区数据加载状态
+let filteredCommunities = [];
+let currentPage = 1;
+const pageSize = 20;
+let sortField = 'price';
+let sortOrder = 'desc';
+const moduleStatus = {
+  overview: null,
+  stats: null,
+  trend: null,
+  priceDist: null,
+  rentalYield: null,
+  areaDist: null
+};
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+  bindMetricCardScroll();
+  loadOverview();
+  loadStatsData();
+  loadTrendData();
+  loadPriceDistData();
+  loadRentalYieldData();
+  loadAreaDistData();
+});
+
+function bindMetricCardScroll() {
+  document.querySelectorAll('.stat-card.clickable').forEach(card => {
+    card.addEventListener('click', () => {
+      const chartId = card.dataset.scrollTarget;
+      const target = document.getElementById(chartId + 'Card') || document.getElementById(chartId);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+}
+
+function setDataStatusState(text, cls) {
+  const el = document.getElementById('dataStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.remove('ok', 'warn', 'error');
+  if (cls) el.classList.add(cls);
+}
+
+function updateGlobalStatus() {
+  const vals = Object.values(moduleStatus).filter(v => v !== null);
+  if (vals.length === 0) {
+    setDataStatusState('数据加载中', '');
+    return;
+  }
+  const success = vals.filter(Boolean).length;
+  if (success === vals.length) {
+    setDataStatusState('数据状态：全部正常', 'ok');
+  } else if (success === 0) {
+    setDataStatusState('数据状态：全部异常', 'error');
+  } else {
+    setDataStatusState(`数据状态：部分异常（${success}/${vals.length}）`, 'warn');
+  }
+}
+
+function setChartEmpty(chart, containerId, message = '暂无数据', retryAction = '') {
+  if (chart) chart.clear();
+  const container = document.getElementById(containerId);
+  if (container) {
+    const retryBtn = retryAction
+      ? `<div class="chart-empty-actions"><button class="retry-btn" onclick="retryWithLoading(this, '${retryAction}')">重试</button></div>`
+      : '';
+    container.innerHTML = `<div class="chart-empty">${message}${retryBtn}</div>`;
+  }
+}
+
+async function fetchJson(url, timeoutMs = 12000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error(`SERVICE_HTTP_${res.status}`);
+    return await res.json();
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('TIMEOUT');
+    if (e.message && e.message.startsWith('SERVICE_HTTP_')) throw e;
+    throw new Error('NETWORK');
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function getErrorText(err) {
+  if (!err || !err.message) return '数据加载失败';
+  if (err.message === 'TIMEOUT') return '请求超时，请稍后重试';
+  if (err.message === 'NETWORK') return '网络异常，请检查连接后重试';
+  if (err.message.startsWith('SERVICE_HTTP_')) {
+    const code = err.message.replace('SERVICE_HTTP_', '');
+    return `服务异常（${code}），请稍后重试`;
+  }
+  return '数据加载失败';
+}
+
+window.retryWithLoading = async function(btn, actionName) {
+  if (!btn || !actionName || typeof window[actionName] !== 'function') return;
+  if (btn.disabled) return;
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '重试中...';
+  try {
+    await window[actionName]();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
+// 加载概览数据
+async function loadOverview() {
+  try {
+    const data = await fetchJson('/xuequ/data/overview');
+    
+    document.getElementById('totalRecords').textContent = data.total_records?.toLocaleString() || '-';
+      document.getElementById('totalRecords').classList.remove('loading');
+    document.getElementById('totalCommunities').textContent = (data.project_count || 0).toLocaleString();
+      document.getElementById('totalCommunities').classList.remove('loading');
+    document.getElementById('totalZones').textContent = Object.keys(data.transaction_zones || {}).length || '-';
+      document.getElementById('totalZones').classList.remove('loading');
+    const updatedAt = data.updated_at ? new Date(data.updated_at) : new Date();
+    document.getElementById('updateTime').textContent = '数据更新于 ' + updatedAt.toLocaleString('zh-CN');
+    moduleStatus.overview = true;
+    updateGlobalStatus();
+    
+    // 渲染区域成交分布图
+    renderZoneChart(data.transaction_zones || {});
+    // 渲染区域楼盘分布图
+    renderProjectZoneChart(data.project_zones || {});
+    
+    // 填充区域筛选下拉
+    populateZoneFilter(data.transaction_zones || {});
+  } catch(e) {
+    console.error('加载概览数据失败:', e);
+    document.getElementById('updateTime').textContent = '数据加载失败，请稍后重试';
+    moduleStatus.overview = false;
+    updateGlobalStatus();
+  }
+}
+
+
+// 填充区域筛选
+function populateZoneFilter(zones) {
+  const select = document.getElementById('zoneFilter');
+  Object.keys(zones).forEach(zone => {
+    const opt = document.createElement('option');
+    opt.value = zone;
+    opt.textContent = zone;
+    select.appendChild(opt);
+  });
+}
+
+// 渲染区域分布图
+function renderZoneChart(zones) {
+  if(!zoneChart){zoneChart=echarts.init(document.getElementById('zoneChart'));window.addEventListener('resize',()=>zoneChart.resize());}
+  const chart=zoneChart;
+  const entries = Object.entries(zones).sort((a, b) => Number(b[1]) - Number(a[1]));
+  // 空数据兜底
+  if (entries.length === 0) {
+    setChartEmpty(zoneChart, 'zoneChart', '暂无数据', 'loadOverview()');
+    return;
+  }
+  
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(17, 24, 35, 0.95)',
+      borderColor: 'rgba(255,255,255,0.1)',
+      textStyle: { color: '#e8ecf1' },
+      formatter: params => params[0].name + '<br/>成交记录: ' + Number(params[0].value).toLocaleString() + ' 条'
+    },
+    grid: { left: 60, right: 20, top: 10, bottom: 30 },
+    xAxis: {
+      type: 'category',
+      data: entries.map(e => e[0]),
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11, interval: 0, hideOverlap: true }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11 }
+    },
+    series: [{
+      type: 'bar',
+      data: entries.map(e => e[1]),
+      barWidth: 24,
+      itemStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(59, 130, 246, 0.8)' },
+          { offset: 1, color: 'rgba(59, 130, 246, 0.2)' }
+        ]),
+        borderRadius: [4, 4, 0, 0]
+      }
+    }]
+  });
+  
+}
+
+// 渲染TOP10价格图
+function renderTopPriceChart(communities) {
+  if(!topPriceChart){topPriceChart=echarts.init(document.getElementById('topPriceChart'));window.addEventListener('resize',()=>topPriceChart.resize());}
+  const chart=topPriceChart;
+  const top10 = [...communities]
+    .filter(c => Number(c.avg_price) > 0)
+    .sort((a, b) => Number(b.avg_price) - Number(a.avg_price))
+    .slice(0, 10)
+    .reverse();
+  // 空数据兜底
+  if (top10.length === 0) {
+    setChartEmpty(topPriceChart, 'topPriceChart', '暂无数据', 'loadStatsData()');
+    return;
+  }
+  
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(17, 24, 35, 0.95)',
+      borderColor: 'rgba(255,255,255,0.1)',
+      textStyle: { color: '#e8ecf1' },
+      formatter: params => params[0].name + '<br/>均价: ' + Number(params[0].value).toLocaleString() + ' 元/㎡'
+    },
+    grid: { left: 100, right: 20, top: 10, bottom: 30 },
+    xAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11 }
+    },
+    yAxis: {
+      type: 'category',
+      data: top10.map(c => c.name),
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11 }
+    },
+    series: [{
+      type: 'bar',
+      data: top10.map(c => c.avg_price),
+      barWidth: 16,
+      itemStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+          { offset: 0, color: 'rgba(201, 169, 98, 0.2)' },
+          { offset: 1, color: 'rgba(201, 169, 98, 0.9)' }
+        ]),
+        borderRadius: [0, 4, 4, 0]
+      }
+    }]
+  });
+  
+}
+
+
+// 渲染区域楼盘分布图
+function renderProjectZoneChart(zones) {
+  if(!projectZoneChart){projectZoneChart=echarts.init(document.getElementById('projectZoneChart'));window.addEventListener('resize',()=>projectZoneChart.resize());}
+  const chart=projectZoneChart;
+  const entries = Object.entries(zones).sort((a, b) => Number(b[1]) - Number(a[1]));
+  if (entries.length === 0) {
+    setChartEmpty(projectZoneChart, 'projectZoneChart', '暂无数据', 'loadOverview()');
+    return;
+  }
+  
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(17, 24, 35, 0.95)',
+      borderColor: 'rgba(255,255,255,0.1)',
+      textStyle: { color: '#e8ecf1' },
+      formatter: params => params[0].name + '<br/>楼盘数量: ' + Number(params[0].value).toLocaleString() + ' 个'
+    },
+    grid: { left: 60, right: 20, top: 10, bottom: 30 },
+    xAxis: {
+      type: 'category',
+      data: entries.map(e => e[0]),
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11, interval: 0, hideOverlap: true }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11 }
+    },
+    series: [{
+      type: 'bar',
+      data: entries.map(e => e[1]),
+      barWidth: 24,
+      itemStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(16, 185, 129, 0.8)' },
+          { offset: 1, color: 'rgba(16, 185, 129, 0.2)' }
+        ]),
+        borderRadius: [4, 4, 0, 0]
+      }
+    }]
+  });
+}
+
+// 渲染区域均价对比图
+function renderZonePriceChart(zones) {
+  if(!zonePriceChart){zonePriceChart=echarts.init(document.getElementById('zonePriceChart'));window.addEventListener('resize',()=>zonePriceChart.resize());}
+  const chart=zonePriceChart;
+  const entries = Object.entries(zones).sort((a, b) => Number(b[1]) - Number(a[1]));
+  if (entries.length === 0) {
+    setChartEmpty(zonePriceChart, 'zonePriceChart', '暂无数据', 'loadStatsData()');
+    return;
+  }
+  
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(17, 24, 35, 0.95)',
+      borderColor: 'rgba(255,255,255,0.1)',
+      textStyle: { color: '#e8ecf1' },
+      formatter: params => params[0].name + '<br/>区域均价: ' + Number(params[0].value).toLocaleString() + ' 元/㎡'
+    },
+    grid: { left: 60, right: 20, top: 10, bottom: 30 },
+    xAxis: {
+      type: 'category',
+      data: entries.map(e => e[0]),
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11, interval: 0, hideOverlap: true }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11 }
+    },
+    series: [{
+      type: 'bar',
+      data: entries.map(e => e[1]),
+      barWidth: 24,
+      itemStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(201, 169, 98, 0.8)' },
+          { offset: 1, color: 'rgba(201, 169, 98, 0.2)' }
+        ]),
+        borderRadius: [4, 4, 0, 0]
+      }
+    }]
+  });
+}
+
+// 搜索
+let searchTimeout = null;
+function handleSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    currentPage = 1;
+    applyFilters();
+  }, 300);
+}
+
+// 应用筛选
+function applyFilters() {
+  const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+  const zone = document.getElementById('zoneFilter').value;
+  const sortBy = document.getElementById('sortBy').value;
+  
+  // 筛选
+  filteredCommunities = allCommunities.filter(c => {
+    if (keyword && !c.name.toLowerCase().includes(keyword)) return false;
+    if (zone && c.zone !== zone) return false;
+    // 价格区间筛选
+    const priceRange = document.getElementById('priceFilter').value;
+    if (priceRange && c.avg_price) {
+      const [min, max] = priceRange.split('-').map(Number);
+      const price = Number(c.avg_price) / 10000; // 转成万/㎡
+      if (price < min || price > max) return false;
+    }
+    return true;
+  });
+  
+  // 排序
+  switch(sortBy) {
+    case 'price_desc':
+      filteredCommunities.sort((a, b) => (b.avg_price || 0) - (a.avg_price || 0));
+      break;
+    case 'price_asc':
+      filteredCommunities.sort((a, b) => (a.avg_price || 0) - (b.avg_price || 0));
+      break;
+    case 'name_asc':
+      filteredCommunities.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+      break;
+    case 'name_desc':
+      filteredCommunities.sort((a, b) => b.name.localeCompare(a.name, 'zh'));
+      break;
+  }
+  
+  currentPage = 1;
+  renderTable();
+  renderPagination();
+  // 筛选后更新区域均价图
+  if (filteredCommunities.length > 0) {
+    const zonePriceStats = {};
+    const zonePriceCount = {};
+    filteredCommunities.forEach(c => {
+      if (c.zone && c.avg_price) {
+        if (!zonePriceStats[c.zone]) { zonePriceStats[c.zone] = 0; zonePriceCount[c.zone] = 0; }
+        zonePriceStats[c.zone] += Number(c.avg_price);
+        zonePriceCount[c.zone] += 1;
+      }
+    });
+    const zoneAvgPrice = {};
+    Object.keys(zonePriceStats).forEach(z => {
+      zoneAvgPrice[z] = Math.round(zonePriceStats[z] / zonePriceCount[z]);
+    });
+    renderZonePriceChart(zoneAvgPrice);
+  }
+  // 筛选后更新TOP10图表
+  renderTopPriceChart(filteredCommunities);
+  // 筛选后更新区域楼盘分布图
+  if (filteredCommunities.length > 0) {
+    const zoneStats = {};
+    filteredCommunities.forEach(c => {
+      if (c.zone) zoneStats[c.zone] = (zoneStats[c.zone] || 0) + 1;
+    });
+    renderProjectZoneChart(zoneStats);
+  }
+}
+
+// 排序
+function sortBy(field) {
+  if (sortField === field) {
+    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField = field;
+    sortOrder = 'desc';
+  }
+  
+  filteredCommunities.sort((a, b) => {
+    let va = a[field] || 0;
+    let vb = b[field] || 0;
+    if (typeof va === 'string') {
+      return sortOrder === 'asc' ? va.localeCompare(vb, 'zh') : vb.localeCompare(va, 'zh');
+    }
+    return sortOrder === 'asc' ? va - vb : vb - va;
+  });
+  
+  renderTable();
+}
+
+// 渲染表格
+function renderTable() {
+  const tbody = document.getElementById('communityTableBody');
+  const start = (currentPage - 1) * pageSize;
+  const pageData = filteredCommunities.slice(start, start + pageSize);
+  
+  if (communitiesLoading) {
+    document.getElementById('listCount').textContent = '加载中...';
+    tbody.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="loading-spinner"></div>数据加载中，请稍候...</div></td></tr>';
+    return;
+  }
+  
+  document.getElementById('listCount').textContent = `共 ${filteredCommunities.length.toLocaleString()} 个小区`;
+  
+  if (pageData.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="loading">暂无匹配的小区</div></td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = pageData.map(c => `
+    <tr>
+      <td><div class="community-name" onclick="showDetail('${c.name}')">${c.name}</div></td>
+      <td><span class="community-zone">${c.zone || '-'}</span></td>
+      <td>${c.location || '-'}</td>
+      <td class="price-num">${c.avg_price ? Number(c.avg_price).toLocaleString() : '-'}<span style="font-size:11px;color:var(--text-tertiary)">元/㎡</span></td>
+      <td class="avg-rent">${c.avg_rent ? Number(c.avg_rent).toLocaleString() + '元' : '-'}</td>
+      <td><span class="rental-yield">${c.rental_yield ? c.rental_yield + '%' : '-'}</span></td>
+    </tr>
+  `).join('');
+}
+
+// 渲染分页
+function renderPagination() {
+  const totalPages = Math.ceil(filteredCommunities.length / pageSize);
+  const pagination = document.getElementById('pagination');
+  
+  if (totalPages <= 1) {
+    pagination.innerHTML = '';
+    return;
+  }
+  
+  let html = `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一页</button>`;
+  
+  // 页码逻辑
+  let pages = [];
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    if (currentPage <= 4) {
+      pages = [1, 2, 3, 4, 5, '...', totalPages];
+    } else if (currentPage >= totalPages - 3) {
+      pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    } else {
+      pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+    }
+  }
+  
+  pages.forEach(p => {
+    if (p === '...') {
+      html += '<button disabled style="border:none;background:none">...</button>';
+    } else {
+      html += `<button class="${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+    }
+  });
+  
+  html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一页</button>`;
+  pagination.innerHTML = html;
+}
+
+function goToPage(page) {
+  const totalPages = Math.ceil(filteredCommunities.length / pageSize);
+  if (page < 1 || page > totalPages) return;
+  currentPage = page;
+  renderTable();
+  renderPagination();
+  document.querySelector('.community-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 显示详情
+async function showDetail(name) {
+  const modal = document.getElementById('detailModal');
+  document.getElementById('modalTitle').textContent = name;
+  document.getElementById('modalBody').innerHTML = '<div class="loading"><div class="loading-spinner"></div>加载中...</div>';
+  modal.classList.add('show');
+  
+  try {
+    const res = await fetch('/xuequ/data/community/' + encodeURIComponent(name));
+    const data = await res.json();
+    
+    if (data.error) {
+      document.getElementById('modalBody').innerHTML = `<div class="loading">${data.error}</div>`;
+      return;
+    }
+    
+    const community = data.community || data;
+    renderDetail(community);
+  } catch(e) {
+    document.getElementById('modalBody').innerHTML = '<div class="loading">加载失败</div>';
+  }
+}
+
+function renderDetail(c) {
+  const body = document.getElementById('modalBody');
+  
+  // 计算租金回报率（模拟）
+  const estimatedRent = c.avg_price ? Math.round(c.avg_price * 0.025 / 12) : 0;
+  
+  body.innerHTML = `
+    <div class="detail-section">
+      <h4>基本信息</h4>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="label">小区名称</div>
+          <div class="value">${c.name || '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">所属区域</div>
+          <div class="value">${c.zone || '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">地段</div>
+          <div class="value">${c.location || '-'}</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="detail-section">
+      <h4>价格信息</h4>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="label">参考均价</div>
+          <div class="value gold">${c.avg_price ? c.avg_price.toLocaleString() + ' 元/㎡' : '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">估算月租金</div>
+          <div class="value green">${estimatedRent ? estimatedRent.toLocaleString() + ' 元' : '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="label">租金回报率</div>
+          <div class="value">${c.avg_price ? ((estimatedRent * 12) / (c.avg_price * 1) * 100).toFixed(2) + '%' : '-'}</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="detail-section">
+      <h4>其他信息</h4>
+      <div class="detail-grid">
+        ${c.building_type ? `
+        <div class="detail-item">
+          <div class="label">建筑类型</div>
+          <div class="value">${c.building_type}</div>
+        </div>` : ''}
+        ${c.property_fee ? `
+        <div class="detail-item">
+          <div class="label">物业费</div>
+          <div class="value">${c.property_fee}</div>
+        </div>` : ''}
+        ${c.developer ? `
+        <div class="detail-item">
+          <div class="label">开发商</div>
+          <div class="value">${c.developer}</div>
+        </div>` : ''}
+      </div>
+      ${!c.building_type && !c.property_fee && !c.developer ? '<div style="color:var(--text-tertiary);font-size:12px">暂无更多详细信息</div>' : ''}
+    </div>
+    
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-color);font-size:11px;color:var(--text-tertiary);">
+      数据来源：深圳市住房和建设局、深圳市政府数据开放平台 | 仅供参考
+    </div>
+  `;
+}
+
+// 关闭弹窗
+function closeModal(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('detailModal').classList.remove('show');
+}
+
+// ESC关闭
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+
+// 加载成交走势数据
+async function loadTrendData() {
+  try {
+    const data = await fetchJson('/xuequ/data/trend');
+    renderTrendChart(data.data || []);
+    moduleStatus.trend = true;
+    updateGlobalStatus();
+    return true;
+  } catch(e) {
+    console.error('加载成交走势失败:', e);
+    setChartEmpty(trendChart, 'trendChart', getErrorText(e), 'loadTrendData');
+    moduleStatus.trend = false;
+    updateGlobalStatus();
+    return false;
+  }
+}
+
+// 渲染成交走势图表
+function renderTrendChart(trendData) {
+  if(!trendChart){trendChart=echarts.init(document.getElementById('trendChart'));window.addEventListener('resize',()=>trendChart.resize());}
+  const chart=trendChart;
+  
+  if (!trendData || trendData.length === 0) {
+    setChartEmpty(trendChart, 'trendChart', '暂无数据', 'loadTrendData()');
+    return;
+  }
+  
+  const months = trendData.map(d => d.month);
+  
+  // 提取所有区域
+  const allZones = new Set();
+  trendData.forEach(d => {
+    if (d.zones) {
+      Object.keys(d.zones).forEach(z => allZones.add(z));
+    }
+  });
+  
+  // 按成交量排序区域
+  const zoneTotals = {};
+  allZones.forEach(z => {
+    zoneTotals[z] = trendData.reduce((sum, d) => sum + (d.zones?.[z] || 0), 0);
+  });
+  const sortedZones = Object.keys(zoneTotals).sort((a, b) => zoneTotals[b] - zoneTotals[a]);
+  
+  // 配色方案
+  const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#6366f1', '#f43f5e', '#84cc16', '#f97316', '#14b8a6'];
+  
+  // 生成堆叠区域系列
+  const series = sortedZones.map((zone, idx) => ({
+    name: zone,
+    type: 'line',
+    stack: 'total',
+    smooth: true,
+    symbol: 'none',
+    lineStyle: { width: 1, opacity: 0.8 },
+    areaStyle: {
+      opacity: 0.7,
+      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: colors[idx % colors.length] + 'cc' },
+        { offset: 1, color: colors[idx % colors.length] + '10' }
+      ])
+    },
+    emphasis: {
+      focus: 'series'
+    },
+    data: trendData.map(d => d.zones?.[zone] || 0)
+  }));
+  
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(17, 24, 35, 0.95)',
+      borderColor: 'rgba(255,255,255,0.1)',
+      textStyle: { color: '#e8ecf1' },
+      formatter: params => {
+        let total = 0;
+        let content = params[0].name + '<br/>';
+        params.slice().reverse().forEach(p => {
+          content += `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};margin-right:6px"></span>${p.seriesName}: ${Number(p.value).toLocaleString()} 套<br/>`;
+          total += p.value;
+        });
+        content += `<strong>合计: ${Number(total).toLocaleString()} 套</strong>`;
+        return content;
+      }
+    },
+    legend: {
+      data: sortedZones.slice(0, 6),
+      textStyle: { color: '#8a94a6', fontSize: 10 },
+      top: 0,
+      type: 'scroll',
+      pageIconColor: '#8a94a6',
+      pageTextStyle: { color: '#8a94a6' }
+    },
+    grid: { left: 60, right: 20, top: 30, bottom: 30 },
+    xAxis: {
+      type: 'category',
+      data: months,
+      boundaryGap: false,
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 10, rotate: window.innerWidth < 768 ? 35 : 45, hideOverlap: true }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11 }
+    },
+    series: series
+  });
+}
+
+// 加载价格分布数据
+async function loadPriceDistData() {
+  try {
+    const data = await fetchJson('/xuequ/data/price-distribution');
+    renderPriceDistChart(data.price_distribution || []);
+    moduleStatus.priceDist = true;
+    updateGlobalStatus();
+    return true;
+  } catch(e) {
+    console.error('加载价格分布失败:', e);
+    setChartEmpty(priceDistChart, 'priceDistChart', getErrorText(e), 'loadPriceDistData');
+    moduleStatus.priceDist = false;
+    updateGlobalStatus();
+    return false;
+  }
+}
+
+// 渲染价格分布图表
+function renderPriceDistChart(distData) {
+  if(!priceDistChart){priceDistChart=echarts.init(document.getElementById('priceDistChart'));window.addEventListener('resize',()=>priceDistChart.resize());}
+  const chart=priceDistChart;
+  
+  if (!distData || distData.length === 0) {
+    setChartEmpty(priceDistChart, 'priceDistChart', '暂无数据', 'loadPriceDistData()');
+    return;
+  }
+  
+  const labels = distData.map(d => d.range);
+  const values = distData.map(d => d.count);
+  
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(17, 24, 35, 0.95)',
+      borderColor: 'rgba(255,255,255,0.1)',
+      textStyle: { color: '#e8ecf1' },
+      formatter: params => params[0].name + '<br/>小区数: ' + Number(params[0].value).toLocaleString() + ' 个'
+    },
+    grid: { left: 60, right: 20, top: 10, bottom: 30 },
+    xAxis: {
+      type: 'category',
+      data: labels,
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 10, rotate: window.innerWidth < 768 ? 20 : 30, hideOverlap: true }
+    },
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11 }
+    },
+    series: [{
+      type: 'bar',
+      data: values,
+      barWidth: 20,
+      itemStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: 'rgba(201, 169, 98, 0.9)' },
+          { offset: 1, color: 'rgba(201, 169, 98, 0.2)' }
+        ]),
+        borderRadius: [4, 4, 0, 0]
+      }
+    }]
+  });
+}
+
+
+
+// 加载租金回报率数据
+async function loadRentalYieldData() {
+  try {
+    const data = await fetchJson('/xuequ/data/stats');
+    
+    // 更新统计卡片
+    if (data.avg_rental_yield) {
+      document.getElementById('avgRentalYield').textContent = data.avg_rental_yield + '%';
+    }
+    if (data.rental_data_source) {
+      document.getElementById('rentalSource').textContent = 
+        data.rental_data_source === 'mixed' ? '含真实成交数据' : '估算数据';
+    }
+    if ((data.real_rent_count || 0) < 20) {
+      document.getElementById('rentalSource').textContent += '（样本偏少）';
+    }
+    
+    renderRentalYieldChart(data.zone_rental_yields || []);
+    moduleStatus.rentalYield = true;
+    updateGlobalStatus();
+    return true;
+  } catch(e) {
+    console.error('加载租金回报率失败:', e);
+    setChartEmpty(rentalYieldChart, 'rentalYieldChart', getErrorText(e), 'loadRentalYieldData');
+    moduleStatus.rentalYield = false;
+    updateGlobalStatus();
+    return false;
+  }
+}
+
+// 渲染租金回报率图表
+function renderRentalYieldChart(yieldData) {
+  if(!rentalYieldChart){rentalYieldChart=echarts.init(document.getElementById('rentalYieldChart'));window.addEventListener('resize',()=>rentalYieldChart.resize());}
+  const chart=rentalYieldChart;
+  
+  if (!yieldData || yieldData.length === 0) {
+    setChartEmpty(rentalYieldChart, 'rentalYieldChart', '暂无数据', 'loadRentalYieldData()');
+    return;
+  }
+  
+  const zones = yieldData.map(d => d.zone);
+  const yields = yieldData.map(d => d.rental_yield);
+  
+  chart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(17, 24, 35, 0.95)',
+      borderColor: 'rgba(255,255,255,0.1)',
+      textStyle: { color: '#e8ecf1' },
+      formatter: params => {
+        const d = yieldData[params[0].dataIndex];
+        return `${d.zone}<br/>租金回报率: ${d.rental_yield}%<br/>均价: ${Number(d.avg_price).toLocaleString()}元/㎡<br/>月租金: ${Number(d.avg_monthly_rent).toLocaleString()}元`;
+      }
+    },
+    grid: { left: 60, right: 30, top: 10, bottom: 30 },
+    xAxis: {
+      type: 'category',
+      data: zones,
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 10, rotate: window.innerWidth < 768 ? 20 : 30, hideOverlap: true }
+    },
+    yAxis: {
+      type: 'value',
+      name: '回报率(%)',
+      nameTextStyle: { color: '#8a94a6', fontSize: 10 },
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+      axisLabel: { color: '#8a94a6', fontSize: 11 }
+    },
+    series: [{
+      type: 'bar',
+      data: yields,
+      barWidth: '50%',
+      itemStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          { offset: 0, color: '#10b981' },
+          { offset: 1, color: '#059669' }
+        ]),
+        borderRadius: [4, 4, 0, 0]
+      },
+      label: {
+        show: true,
+        position: 'top',
+        color: '#10b981',
+        fontSize: 10,
+        formatter: '{c}%'
+      }
+    }]
+  });
+}
+
+// 加载面积分布数据
+async function loadAreaDistData() {
+  try {
+    const data = await fetchJson('/xuequ/data/stats');
+    renderAreaDistChart(data.area_distribution || []);
+    moduleStatus.areaDist = true;
+    updateGlobalStatus();
+    return true;
+  } catch(e) {
+    console.error('加载面积分布失败:', e);
+    setChartEmpty(areaDistChart, 'areaDistChart', getErrorText(e), 'loadAreaDistData');
+    moduleStatus.areaDist = false;
+    updateGlobalStatus();
+    return false;
+  }
+}
+
+// 渲染面积分布图表
+function renderAreaDistChart(areaData) {
+  if(!areaDistChart){areaDistChart=echarts.init(document.getElementById('areaDistChart'));window.addEventListener('resize',()=>areaDistChart.resize());}
+  const chart=areaDistChart;
+  
+  if (!areaData || areaData.length === 0) {
+    setChartEmpty(areaDistChart, 'areaDistChart', '暂无数据', 'loadAreaDistData()');
+    return;
+  }
+  
+  const ranges = areaData.map(d => d.range);
+  const counts = areaData.map(d => d.count);
+  
+  chart.setOption({
+    tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(17, 24, 35, 0.95)',
+      borderColor: 'rgba(255,255,255,0.1)',
+      textStyle: { color: '#e8ecf1' },
+      formatter: '{b}: {c}套 ({d}%)'
+    },
+    legend: {
+      bottom: 0,
+      textStyle: { color: '#8a94a6', fontSize: 10 }
+    },
+    series: [{
+      type: 'pie',
+      radius: ['35%', '65%'],
+      center: ['50%', '45%'],
+      avoidLabelOverlap: true,
+      itemStyle: {
+        borderRadius: 4,
+        borderColor: 'rgba(17, 24, 35, 0.95)',
+        borderWidth: 2
+      },
+      label: {
+        show: false
+      },
+      emphasis: {
+        label: {
+          show: true,
+          fontSize: 12,
+          fontWeight: 'bold',
+          color: '#e8ecf1'
+        }
+      },
+      labelLine: {
+        show: false
+      },
+      data: counts.map((c, i) => ({
+        value: c,
+        name: ranges[i]
+      }))
+    }]
+  });
+}
+
+// 渲染汇总统计
+function renderSummaryStats(stats) {
+  if (!stats) return;
+  
+  // 全市均价
+  const avgPrice = stats.zone_projects?.reduce((sum, z) => sum + (z.avg_price || 0), 0) / 
+                   (stats.zone_projects?.length || 1);
+  document.getElementById('summaryAvgPrice').textContent = Math.round(avgPrice || 0).toLocaleString();
+  
+  // 平均月租金
+  document.getElementById('summaryAvgRent').textContent = Math.round(stats.avg_estimated_rent || 0).toLocaleString();
+  
+  // 平均租金回报率
+  document.getElementById('summaryYield').textContent = (stats.avg_rental_yield || 0).toFixed(2) + '%';
+  
+  // 总成交笔数
+  document.getElementById('summaryTransactionCount').textContent = (stats.total_transactions || 0).toLocaleString();
+  
+  // 平均成交面积
+  document.getElementById('avgTransactionArea').textContent = (stats.avg_transaction_area || 0).toFixed(1);
+  
+  // 总成交面积（万㎡）
+  document.getElementById('totalTransactionArea').textContent = ((stats.total_transaction_area || 0) / 10000).toFixed(2);
+  
+  // 真实租金数据
+  document.getElementById('realRentCount').textContent = stats.real_rent_count || 0;
+  
+  // 租金覆盖率
+  document.getElementById('rentalCoverage').textContent = (stats.rental_coverage || 0).toFixed(1);
+  if ((stats.real_rent_count || 0) < 20) {
+    document.getElementById('summaryYieldSub').textContent = '年化（低样本估算）';
+  }
+  
+  // 渲染区域排行
+  renderZoneRanking(stats.zone_rental_yields || []);
+}
+
+// 渲染区域排行
+function renderZoneRanking(zoneData) {
+  const container = document.getElementById('zoneRanking');
+  if (!zoneData || zoneData.length === 0) {
+    container.innerHTML = '<div class="loading">暂无数据</div>';
+    return;
+  }
+  
+  // 按租金回报率排序
+  const sorted = [...zoneData].sort((a, b) => (b.rental_yield || 0) - (a.rental_yield || 0));
+  
+  container.innerHTML = sorted.map((z, i) => `
+    <div class="rank-item" style="display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:24px;height:24px;border-radius:50%;background:${i < 3 ? 'linear-gradient(135deg,var(--accent),var(--accent2))' : 'var(--input)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:${i < 3 ? '#fff' : 'var(--text2)'}">${i + 1}</div>
+        <div>
+          <div style="font-weight:500;font-size:14px;">${z.zone || '未知'}</div>
+          <div style="font-size:12px;color:var(--text2);">${z.project_count || 0}个楼盘 · 均价${Math.round(z.avg_price || 0).toLocaleString()}元/㎡</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:16px;font-weight:600;color:var(--green);">${(z.rental_yield || 0).toFixed(2)}%</div>
+        <div style="font-size:12px;color:var(--text2);">月租${Math.round(z.avg_monthly_rent || 0).toLocaleString()}元</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 加载统计数据
+
+// 加载楼盘列表数据
+async function loadCommunities() {
+  try {
+    const res = await fetch('/xuequ/data/communities?limit=10000');
+    const data = await res.json();
+    allCommunities = data.communities || [];
+    filteredCommunities = [...allCommunities];
+    
+    // 渲染TOP10价格图
+    renderTopPriceChart(allCommunities);
+    
+    // 渲染表格和分页
+    renderTable();
+    renderPagination();
+  } catch(e) {
+    console.error('加载楼盘数据失败:', e);
+  } finally {
+    communitiesLoading = false;
+    renderTable();
+  }
+}
+
+async function loadStatsData() {
+  try {
+    const data = await fetchJson('/xuequ/data/stats');
+    renderSummaryStats(data);
+    // 渲染各区域均价对比图
+    if (data.zone_projects && data.zone_projects.length > 0) {
+      const zonePrices = {};
+      data.zone_projects.forEach(z => {
+        if (z.zone && z.avg_price) {
+          zonePrices[z.zone] = Number(z.avg_price);
+        }
+      });
+      if (Object.keys(zonePrices).length > 0) {
+        renderZonePriceChart(zonePrices);
+      }
+    }
+    moduleStatus.stats = true;
+    updateGlobalStatus();
+    return true;
+  } catch(e) {
+    console.error('加载统计数据失败:', e);
+    setChartEmpty(zonePriceChart, 'zonePriceChart', getErrorText(e), 'loadStatsData');
+    setChartEmpty(topPriceChart, 'topPriceChart', getErrorText(e), 'loadStatsData');
+    moduleStatus.stats = false;
+    updateGlobalStatus();
+    return false;
+  }
+}
+</script>
+</body>
+</html>
