@@ -1,7 +1,9 @@
 #!/bin/bash
 # 深圳学位房规划助手 - 一键部署脚本
 
-set -e
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
 echo "============================================"
 echo "🏠 深圳学位房规划助手 部署脚本"
@@ -18,7 +20,7 @@ mkdir -p /opt/xuequ-api
 
 # 3. 部署前端
 echo "[3/6] 部署前端页面..."
-cp ./index.html /var/www/xuequ/
+bash "$SCRIPT_DIR/sync-frontend.sh"
 
 # 4. 部署后端
 echo "[4/6] 部署后端服务..."

@@ -5,14 +5,40 @@
 ## 📁 项目结构
 
 ```
-./学区房规划Agent/web/
-├── index.html          # 前端页面（单文件，直接可用）
-├── main.py             # 后端 API（FastAPI）
-├── xuequ-api.service   # Systemd 服务配置
-├── nginx.conf          # Nginx 反向代理配置
-├── deploy.sh           # 一键部署脚本
-└── README.md           # 本文档
+web/
+├── frontend/
+│   ├── index.html      # 主站（唯一源码，改这里）
+│   └── data.html       # 数据大盘（唯一源码，改这里）
+├── sync-frontend.sh    # 同步 frontend → /var/www/xuequ（日常部署）
+├── deploy.sh           # 一键全量部署
+├── backend/main.py     # FastAPI 后端
+├── nginx.conf
+└── README.md
 ```
+
+## ⚠️ 前端修改流程（必读）
+
+**唯一源码目录**：`web/frontend/`  
+**Nginx 服务目录**：`/var/www/xuequ/`（不要直接改这里）
+
+```bash
+# 1. 编辑源码
+vim web/frontend/index.html
+vim web/frontend/data.html
+
+# 2. 提交到 Git
+git add web/frontend/
+git commit -m "你的修改说明"
+git push
+
+# 3. 同步到线上 Nginx 目录
+cd web && bash sync-frontend.sh
+
+# 4. 验证
+curl -sk "https://www.aialter.site/xuequ/data.html" | grep "数据状态"
+```
+
+**常见错误**：只改 `/var/www/xuequ/data.html` 或只 push 不同步，导致仓库与线上不一致。
 
 ## 🚀 快速部署
 
@@ -35,8 +61,8 @@ pip install fastapi uvicorn pydantic
 #### 2. 部署前端
 
 ```bash
-mkdir -p /var/www/xuequ
-cp index.html /var/www/xuequ/
+cd web
+bash sync-frontend.sh
 ```
 
 #### 3. 部署后端

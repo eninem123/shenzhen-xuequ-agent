@@ -23,7 +23,10 @@
 │   └── 深圳学校梯队.md
 ├── web/                     # Web应用
 │   ├── backend/main.py      # FastAPI后端
-│   ├── frontend/index.html  # 前端页面
+│   ├── frontend/
+│   │   ├── index.html       # 主站前端
+│   │   └── data.html        # 数据大盘
+│   ├── sync-frontend.sh     # 前端同步脚本
 │   ├── deploy.sh            # 部署脚本
 │   ├── nginx.conf           # Nginx配置
 │   └── xuequ-api.service    # Systemd服务
